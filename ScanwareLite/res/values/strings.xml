@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Shared -->
+    <string name="app_name">ScanwareLite</string>
+    <string name="btn_back">Back</string>
+    <string name="btn_continue">Continue</string>
+    <string name="dialog_msg_confirm_exit">Do you wish to exit the application?</string>
+    <string name="dialog_title_confirm_exit">Confirm exit</string>
+    <string name="dialog_btn_cancel">Cancel</string>
+
+    <!-- Login -->
+    <string name="btn_login">Login</string>
+    <string name="et_password_hint">adgj</string>
+    <string name="et_username_hint">bramw</string>
+    <string name="dialog_msg_attempting_login">Please wait&#8230;</string>
+    <string name="dialog_msg_invalid_credentials">The given credentials did not match</string>
+    <string name="dialog_msg_no_credentials">Please input your credentials</string>
+    <string name="dialog_msg_no_local_data">Make sure you are connected to the internet when logging in for the first time</string>
+    <string name="dialog_msg_no_password">Please input a password</string>
+    <string name="dialog_msg_no_username">Please input a username</string>
+    <string name="dialog_title_attempting_login">Attempting to login</string>
+    <string name="dialog_title_invalid_credentials">Invalid credentials</string>
+    <string name="dialog_title_no_credentials">No credentials were given</string>
+    <string name="dialog_title_no_local_data">No local data</string>
+    <string name="dialog_title_no_password">No password was given</string>
+    <string name="dialog_title_no_username">No username was given</string>
+    <string name="iv_paylogic_logo">Paylogic logo</string>
+    <string name="tv_login_subtitle">Login</string>
+    <string name="tv_paylogic_scanware">Paylogic Scanware</string>
+
+    <!-- Events -->
+    <string name="dialog_btn_exit">Exit</string>
+    <string name="dialog_btn_download">Download</string>
+    <string name="dialog_btn_overwrite">Overwrite</string>
+    <string name="btn_retry">Retry</string>
+    <string name="dialog_btn_reuse">Re-use</string>
+    <string name="cb_show_all">Show all</string>
+    <string name="dialog_msg_confirm_download">Download data for event: %1$s?</string>
+    <string name="dialog_msg_downloading_event_data">Downloading %1$s kB</string>
+    <string name="dialog_msg_error_500">Something went wrong retrieving event data</string>
+    <string name="dialog_msg_no_resources">The device has no, or lost internet connection,\nand no local data was found</string>
+    <string name="dialog_msg_only_reuse">Can only reuse existing data</string>
+    <string name="dialog_msg_overwrite">Overwrite with event: %1$s?</string>
+    <string name="dialog_msg_retrieving_event_data">Please wait, this may take a while depending on how many tickets have been sold</string>
+    <string name="dialog_msg_retrieving_events">Please wait&#8230;</string>
+    <string name="dialog_msg_reuse_or_overwrite">Would you like to overwrite with new data, or reuse the current data? </string>
+    <string name="dialog_msg_not_enough_disk_space">There is not enough internal disk space available to download the event data</string>
+    <string name="dialog_title_not_enough_disk_space">Not enough internal disk space</string>
+    <string name="dialog_title_confirm_download">Confirm download</string>
+    <string name="dialog_title_downloading_event_data">"Downloading data for event: "</string>
+    <string name="dialog_title_error_500">Error</string>
+    <string name="dialog_title_no_resources">No resources</string>
+    <string name="dialog_title_only_reuse">No connection to Paylogic</string>
+    <string name="dialog_title_overwrite">Previous event data already exists</string>
+    <string name="dialog_title_retrieving_event_data">Retrieving event data&#8230;</string>
+    <string name="dialog_title_retrieving_events">Retrieving events</string>
+    <string name="dialog_title_reuse_or_overwrite">Barcodes for the selected event have already been downloaded.</string>
+    <string name="toast_select_event">Please select an event</string>
+    <string name="tv_events_title">Select an event</string>
+
+    <!-- Products -->
+    <string name="tv_event_name">Event: %1$s</string>
+    <string name="tv_deselect_all">Deselect all</string>
+    <string name="tv_select_all">Select all</string>
+    <string name="msg_retrieving_products">Please wait</string>
+    <string name="title_retrieving_products">Retrieving products</string>
+    <string name="tv_products_title">Select your products</string>
+
+    <!-- Scan -->
+    <string name="tv_tap_to_start">Tap screen to start scanning</string>
+    <string name="tv_tap_to_resume">Tap screen to resume scanning</string>
+    <string name="tv_scan_dialog_title_invalid">Invalid!</string>
+    <string name="tv_scan_dialog_title_disabled">Disabled!</string>
+    <string name="tv_scan_dialog_title_OK">OK!</string>
+    <string name="tv_scan_dialog_msg_not_found">Barcode not found!</string>
+    <string name="tv_scan_dialog_msg_payment_error">Payment error!</string>
+    <string name="tv_scan_dialog_msg_already_scanned">Barcode already scanned at %1$s</string>
+    <string name="tv_scan_dialog_msg_product_disabled">The scanning of this product has been disabled on this device. \n\n Product: %1$s</string>
+    <string name="tv_scan_dialog_msg_OK">Name: %1$s \n\n Product: %2$s</string>
+    <string name="tv_scan_dialog_msg_invalid_checksum">Invalid barcode</string>
+    <string name="tv_scan_dialog_barcode">Barcode: %1$s</string>
+    <string name="dialog_title_manual_input">Manual input</string>
+    <string name="dialog_title_loading_camera">Loading camera</string>
+    <string name="dialog_msg_loading_camera">Please wait&#8230;</string>
+    <string name="dialog_msg_manual_input">Please input a barcode</string>
+
+    <!-- Settings -->
+    <string name="tv_settings">Settings</string>
+    <string name="btn_delete_all_data">Delete all data</string>
+    <string name="dialog_title_delete_data">Warning</string>
+    <string name="dialog_msg_delete_data">This will delete all event and user data. \n You will be logged out, and require internet connection to log in again.</string>
+    <string name="dialog_btn_ok">OK</string>
+
+    <!-- Menu -->
+    <string name="menu_item_show_all_events">Show all events</string>
+    <string name="menu_item_show_active_events">Show active events</string>
+    <string name="menu_item_manual_input">Manual input</string>
+    <string name="menu_item_enable_flashlight">Enable flashlight</string>
+    <string name="menu_item_disable_flashlight">Disable flashlight</string>
+    <string name="menu_item_exit">Exit application</string>
+    <string name="menu_item_logout">Logout</string>
+    <string name="menu_item_settings">Settings</string>
+    <string name="menu_item_pause_scanning">Pause scanning</string>
+
+</resources>
