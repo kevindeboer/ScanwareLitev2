@@ -1,13 +1,12 @@
 package com.paylogic.scanwarelite.views;
 
-import com.paylogic.scanwarelite.R;
-import com.paylogic.scanwarelite.R.color;
-
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.util.AttributeSet;
 import android.widget.TextView;
+
+import com.paylogic.scanwarelite.R;
 
 public class SelectAllTextView extends TextView {
 	private Paint linePaint;
