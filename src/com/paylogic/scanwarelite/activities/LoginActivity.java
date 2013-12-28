@@ -35,12 +35,16 @@ import android.widget.EditText;
 import com.paylogic.scanwarelite.ApiResponse;
 import com.paylogic.scanwarelite.R;
 import com.paylogic.scanwarelite.ScanwareLiteApplication;
-import com.paylogic.scanwarelite.dialogs.EmptyInputDialog;
+import com.paylogic.scanwarelite.dialogs.login.EmptyInputDialog;
+import com.paylogic.scanwarelite.dialogs.login.EmptyPasswordDialog;
+import com.paylogic.scanwarelite.dialogs.login.EmptyUsernameDialog;
+import com.paylogic.scanwarelite.dialogs.login.InvalidCredentialsDialog;
+import com.paylogic.scanwarelite.dialogs.login.LoginDialog;
+import com.paylogic.scanwarelite.dialogs.login.NoLocalDataDialog;
 import com.paylogic.scanwarelite.helpers.ConnectivityHelper;
 import com.paylogic.scanwarelite.helpers.DialogHelper;
 import com.paylogic.scanwarelite.helpers.PreferenceHelper;
 import com.paylogic.scanwarelite.security.BCrypt;
-
 
 public class LoginActivity extends Activity {
 
@@ -81,7 +85,7 @@ public class LoginActivity extends Activity {
 
 	protected void onResume() {
 		super.onResume();
-		
+
 		loginButton.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
 
@@ -90,25 +94,24 @@ public class LoginActivity extends Activity {
 
 				// if both inputs are empty
 				if (username.length() == 0 && password.length() == 0) {
-					alertDialog = new EmptyInputDialog(LoginActivity.this).create();
+					alertDialog = new EmptyInputDialog(LoginActivity.this)
+							.create();
 					alertDialog.show();
 					return;
 				}
 
 				// if password is empty
 				if (password.length() == 0) {
-					alertDialog = DialogHelper.createAlertDialogById(
-							LoginActivity.this,
-							DialogHelper.EMPTY_PASSWORD_DIALOG);
+					alertDialog = new EmptyPasswordDialog(LoginActivity.this)
+							.create();
 					alertDialog.show();
 					return;
 				}
 
 				// if username is empty
 				if (username.length() == 0) {
-					alertDialog = DialogHelper.createAlertDialogById(
-							LoginActivity.this,
-							DialogHelper.EMPTY_USERNAME_DIALOG);
+					alertDialog = new EmptyUsernameDialog(LoginActivity.this)
+							.create();
 					alertDialog.show();
 					return;
 				}
@@ -135,8 +138,7 @@ public class LoginActivity extends Activity {
 
 		@Override
 		protected void onPreExecute() {
-			progressDialog = DialogHelper.createProgressDialogById(
-					LoginActivity.this, DialogHelper.LOGIN_DIALOG);
+			progressDialog = new LoginDialog(LoginActivity.this);
 			progressDialog.show();
 		}
 
@@ -173,9 +175,8 @@ public class LoginActivity extends Activity {
 
 				startActivity(intent);
 			} else if (response == ApiResponse.INVALID_LOGIN) {
-				alertDialog = (AlertDialog) DialogHelper.createAlertDialogById(
-						LoginActivity.this,
-						DialogHelper.INVALID_CREDENTIALS_DIALOG);
+				alertDialog = new InvalidCredentialsDialog(LoginActivity.this)
+						.create();
 				alertDialog.show();
 			}
 		}
@@ -230,8 +231,8 @@ public class LoginActivity extends Activity {
 
 						String salt = BCrypt.gensalt();
 
-//						usernameHash = BCrypt.hashpw(username, salt);
-//						passwordHash = BCrypt.hashpw(password, salt);
+						// usernameHash = BCrypt.hashpw(username, salt);
+						// passwordHash = BCrypt.hashpw(password, salt);
 						usernameHash = "asdasd";
 						passwordHash = "asdasd";
 						response = ApiResponse.OK;
@@ -258,9 +259,7 @@ public class LoginActivity extends Activity {
 
 		@Override
 		protected void onPreExecute() {
-			progressDialog = (ProgressDialog) DialogHelper
-					.createProgressDialogById(LoginActivity.this,
-							DialogHelper.LOGIN_DIALOG);
+			progressDialog = new LoginDialog(LoginActivity.this);
 			progressDialog.show();
 		}
 
@@ -278,14 +277,12 @@ public class LoginActivity extends Activity {
 				startActivity(intent);
 
 			} else if (result == INVALID_LOCAL_CREDENTIALS) {
-				alertDialog = (AlertDialog) DialogHelper.createAlertDialogById(
-						LoginActivity.this,
-						DialogHelper.INVALID_CREDENTIALS_DIALOG);
+				alertDialog = new InvalidCredentialsDialog(LoginActivity.this)
+						.create();
 				alertDialog.show();
 
 			} else if (result == NO_LOCAL_DATA) {
-				alertDialog = (AlertDialog) DialogHelper.createAlertDialogById(
-						LoginActivity.this, DialogHelper.NO_LOCAL_DATA_DIALOG);
+				alertDialog = new NoLocalDataDialog(LoginActivity.this).create();
 				alertDialog.show();
 			}
 		}

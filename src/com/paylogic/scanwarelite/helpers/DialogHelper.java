@@ -25,14 +25,6 @@ public class DialogHelper {
 	public static final int DIALOG_NEGATIVE_BUTTON_LISTENER = 302;
 	public static final int VIEW_ON_CLICK_LISTENER = 303;
 
-	// Dialogs used in LoginActivity
-	public static final int LOGIN_DIALOG = 1;
-	public static final int EMPTY_INPUT_DIALOG = 2;
-	public static final int EMPTY_USERNAME_DIALOG = 3;
-	public static final int EMPTY_PASSWORD_DIALOG = 4;
-	public static final int INVALID_CREDENTIALS_DIALOG = 5;
-	public static final int NO_LOCAL_DATA_DIALOG = 6;
-
 	// Dialogs used in EventsActivity
 	public static final int ONLY_REUSE_DIALOG = 7;
 	public static final int REUSE_OR_OVERWRITE_DIALOG = 8;
@@ -79,26 +71,6 @@ public class DialogHelper {
 				context);
 
 		switch (id) {
-		case EMPTY_INPUT_DIALOG:
-			alertDialogBuilder = createEmptyInputDialog(context,
-					alertDialogBuilder);
-			break;
-		case EMPTY_PASSWORD_DIALOG:
-			alertDialogBuilder = createEmptyPasswordDialog(context,
-					alertDialogBuilder);
-			break;
-		case EMPTY_USERNAME_DIALOG:
-			alertDialogBuilder = createEmptyUsernameDialog(context,
-					alertDialogBuilder);
-			break;
-		case INVALID_CREDENTIALS_DIALOG:
-			alertDialogBuilder = createInvalidCredentialsDialog(context,
-					alertDialogBuilder);
-			break;
-		case NO_LOCAL_DATA_DIALOG:
-			alertDialogBuilder = createNoLocalDataDialog(context,
-					alertDialogBuilder);
-			break;
 		case ONLY_REUSE_DIALOG:
 			alertDialogBuilder = createOnlyReuseDialog(context, dialogHandlers,
 					alertDialogBuilder);
@@ -296,14 +268,6 @@ public class DialogHelper {
 		ProgressDialog progressDialog = new ProgressDialog(context);
 
 		switch (id) {
-		case LOGIN_DIALOG:
-			progressDialog.setTitle(context
-					.getString(R.string.dialog_title_attempting_login));
-			progressDialog.setMessage(context
-					.getString(R.string.dialog_msg_attempting_login));
-			progressDialog.setIndeterminate(true);
-			progressDialog.setCancelable(false);
-			break;
 		case GET_EVENTS_DIALOG:
 			progressDialog.setTitle(context
 					.getString(R.string.dialog_title_retrieving_events));
@@ -472,15 +436,6 @@ public class DialogHelper {
 				dialogHandlers.get(DIALOG_NEGATIVE_BUTTON_LISTENER));
 		return alertDialogBuilder;
 	}
-
-	private static AlertDialog.Builder createNoLocalDataDialog(Context context,
-			AlertDialog.Builder alertDialogBuilder) {
-		alertDialogBuilder.setTitle(context
-				.getString(R.string.dialog_title_no_local_data));
-		alertDialogBuilder.setMessage(context
-				.getString(R.string.dialog_msg_no_local_data));
-		return alertDialogBuilder;
-	}
 	
 	private static AlertDialog.Builder createError500Dialog(Context context,
 			Builder alertDialogBuilder) {
@@ -497,40 +452,5 @@ public class DialogHelper {
 		alertDialogBuilder.setMessage(context
 				.getString(R.string.dialog_msg_not_enough_disk_space));
 		return null;
-	}
-	private static AlertDialog.Builder createInvalidCredentialsDialog(
-			Context context, AlertDialog.Builder alertDialogBuilder) {
-		alertDialogBuilder.setTitle(context
-				.getString(R.string.dialog_title_invalid_credentials));
-		alertDialogBuilder.setMessage(context
-				.getString(R.string.dialog_msg_invalid_credentials));
-		return alertDialogBuilder;
-	}
-
-	private static AlertDialog.Builder createEmptyUsernameDialog(
-			Context context, AlertDialog.Builder alertDialogBuilder) {
-		alertDialogBuilder.setTitle(context
-				.getString(R.string.dialog_title_no_username));
-		alertDialogBuilder.setMessage(context
-				.getString(R.string.dialog_msg_no_username));
-		return alertDialogBuilder;
-	}
-
-	private static AlertDialog.Builder createEmptyPasswordDialog(
-			Context context, AlertDialog.Builder alertDialogBuilder) {
-		alertDialogBuilder.setTitle(context
-				.getString(R.string.dialog_title_no_password));
-		alertDialogBuilder.setMessage(context
-				.getString(R.string.dialog_msg_no_password));
-		return alertDialogBuilder;
-	}
-
-	private static AlertDialog.Builder createEmptyInputDialog(Context context,
-			AlertDialog.Builder alertDialogBuilder) {
-		alertDialogBuilder.setTitle(context
-				.getString(R.string.dialog_title_no_credentials));
-		alertDialogBuilder.setMessage(context
-				.getString(R.string.dialog_msg_no_credentials));
-		return alertDialogBuilder;
 	}
 }

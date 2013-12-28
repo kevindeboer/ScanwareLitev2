@@ -1,4 +1,4 @@
-package com.paylogic.scanwarelite.dialogs;
+package com.paylogic.scanwarelite.dialogs.login;
 
 import android.app.AlertDialog;
 import android.content.Context;
