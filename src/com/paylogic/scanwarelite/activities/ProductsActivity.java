@@ -74,7 +74,7 @@ public class ProductsActivity extends CommonActivity {
 		continueButton.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
 				Intent intent = new Intent(ProductsActivity.this,
-						ScannActivity.class);
+						ScanActivity.class);
 				startActivity(intent);
 			}
 		});

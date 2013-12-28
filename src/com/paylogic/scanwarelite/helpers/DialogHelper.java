@@ -17,7 +17,6 @@ import android.widget.TextView;
 
 import com.paylogic.scanwarelite.R;
 import com.paylogic.scanwarelite.activities.ScanActivity;
-import com.paylogic.scanwarelite.activities.ScannActivity;
 import com.paylogic.scanwarelite.models.Event;
 
 public class DialogHelper {
@@ -343,7 +342,7 @@ public class DialogHelper {
 	}
 
 	private static AlertDialog.Builder createManualInputDialog(Context context) {
-		final ScannActivity scannActivity = (ScannActivity) context;
+		final ScanActivity scannActivity = (ScanActivity) context;
 		scannActivity.setRunning(false);
 		
 		AlertDialog.Builder alertDialogBuilder;

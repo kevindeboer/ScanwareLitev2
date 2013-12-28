@@ -10,15 +10,9 @@ import net.sourceforge.zbar.Image;
 import net.sourceforge.zbar.ImageScanner;
 import net.sourceforge.zbar.Symbol;
 import net.sourceforge.zbar.SymbolSet;
-import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.Dialog;
 import android.content.ContentValues;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.content.res.Configuration;
-import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.hardware.Camera;
@@ -27,16 +21,15 @@ import android.hardware.Camera.Parameters;
 import android.hardware.Camera.PreviewCallback;
 import android.hardware.Camera.Size;
 import android.media.MediaPlayer;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
-import android.text.InputFilter;
 import android.util.SparseArray;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -47,32 +40,23 @@ import com.paylogic.scanwarelite.helpers.DialogHelper;
 import com.paylogic.scanwarelite.helpers.ScanwareLiteOpenHelper;
 import com.paylogic.scanwarelite.views.CameraPreview;
 
-public class ScanActivity extends Activity {
+public class ScanActivity extends CommonActivity {
 	static {
 		System.loadLibrary("iconv");
 	}
-	private Camera mCamera;
-	private CameraPreview mPreview;
+
 	private TextView startScanningView;
-	private AlertDialog.Builder alertDialogBuilder;
-	private AlertDialog alertDialog;
-	private Dialog scanDialog;
-	private SparseArray<View.OnClickListener> viewHandlers = new SparseArray<View.OnClickListener>();
-	private SparseArray<DialogInterface.OnClickListener> dialogHandlers = new SparseArray<DialogInterface.OnClickListener>();
-	private DialogInterface.OnClickListener positiveButtonListener;
-	private DialogInterface.OnClickListener negativeButtonListener;
-	private Resources resources;
-
-	private boolean running = false;
-
+	private CameraPreview mPreview;
+	private Camera mCamera;
 	private ImageScanner scanner;
-	private Handler autoFocusHandler;
-
-	private boolean hasFlashlight;
-	private boolean flashlightEnabled = false;
-
-	private String barcode;
+	private InitCameraTask initCameraTask;
+	private SparseArray<View.OnClickListener> viewHandlers = new SparseArray<View.OnClickListener>();
 	private MediaPlayer mediaPlayer;
+	private boolean hasFlashlight;
+	private boolean flashlightEnabled;
+	private String barcode;
+	private boolean running = false;
+	private Handler autoFocusHandler;
 	private Runnable doAutoFocus = new Runnable() {
 		public void run() {
 			if (mCamera != null) {
@@ -81,14 +65,15 @@ public class ScanActivity extends Activity {
 		}
 	};
 
-	// Mimic continuous auto-focusing
-	AutoFocusCallback autoFocusCB = new AutoFocusCallback() {
+	private AutoFocusCallback autoFocusCB = new AutoFocusCallback() {
 		public void onAutoFocus(boolean success, Camera camera) {
 			autoFocusHandler.postDelayed(doAutoFocus, 1000);
 		}
 	};
+
 	private PreviewCallback previewCb = new PreviewCallback() {
 		public void onPreviewFrame(byte[] data, Camera camera) {
+
 			if (running) {
 				Camera.Parameters parameters = camera.getParameters();
 				Size size = parameters.getPreviewSize();
@@ -98,15 +83,13 @@ public class ScanActivity extends Activity {
 
 				int result = scanner.scanImage(barcodeImage);
 				if (result != 0) {
-					running = false;
 					mCamera.setPreviewCallback(null);
 
 					SymbolSet syms = scanner.getResults();
 					for (Symbol sym : syms) {
 						barcode = sym.getData();
 						// Im only interested in the first result, but there is
-						// no
-						// way to index SymbolSet
+						// no way to index SymbolSet
 						break;
 					}
 					processBarcode(barcode);
@@ -116,50 +99,36 @@ public class ScanActivity extends Activity {
 		}
 	};
 
+	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_scan);
+
 		hasFlashlight = getPackageManager().hasSystemFeature(
 				PackageManager.FEATURE_CAMERA_FLASH);
-		startScanningView = (TextView) findViewById(R.id.textView_start_scanning);
-
-		mCamera = getCameraInstance();
-		autoFocusHandler = new Handler();
-		resources = getResources();
-
-		scanner = new ImageScanner();
-		scanner.setConfig(0, Config.X_DENSITY, 3);
-		scanner.setConfig(0, Config.Y_DENSITY, 3);
-
-		mPreview = new CameraPreview(ScanActivity.this, mCamera, previewCb,
-				autoFocusCB);
-
-		FrameLayout preview = (FrameLayout) findViewById(R.id.camera_preview);
-		preview.addView(mPreview);
 
 	}
 
+	@Override
 	protected void onResume() {
 		super.onResume();
-		mPreview.setOnClickListener(new OnClickListener() {
+		initCameraTask = new InitCameraTask();
+		initCameraTask.execute();
+	}
 
-			@Override
-			public void onClick(View v) {
-				if (!running) {
-					Toast.makeText(ScanActivity.this, "Starting to scan",
-							Toast.LENGTH_LONG).show();
-					running = true;
-					startScanningView.setVisibility(View.GONE);
-				}
-			}
-		});
+	@Override
+	protected void onPause() {
+		super.onPause();
+		releaseCamera();
+
+		startScanningView.setVisibility(View.GONE);
+
 	}
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		MenuInflater menuInflater = getMenuInflater();
 		menuInflater.inflate(R.menu.menu_scan, menu);
-
+		super.onCreateOptionsMenu(menu);
 		return true;
 	}
 
@@ -167,7 +136,14 @@ public class ScanActivity extends Activity {
 	public boolean onPrepareOptionsMenu(Menu menu) {
 		MenuItem flashlightMenuItem = menu.findItem(R.id.menu_flashlight);
 		MenuItem manualInputMenuitem = menu.findItem(R.id.menu_manual_input);
-
+		MenuItem pauseScanningMenuItem = menu.findItem(R.id.menu_pause_scanning);
+		
+		if(running){
+			Toast.makeText(this, "true", Toast.LENGTH_LONG).show();
+		}else {
+			Toast.makeText(this, "false", Toast.LENGTH_LONG).show();
+		}
+		
 		if (hasFlashlight) {
 			if (!flashlightEnabled) {
 				flashlightMenuItem.setTitle(resources
@@ -181,8 +157,11 @@ public class ScanActivity extends Activity {
 		}
 
 		if (!running) {
+			pauseScanningMenuItem.setVisible(false);
 			manualInputMenuitem.setVisible(false);
+			
 		} else {
+			pauseScanningMenuItem.setVisible(true);
 			manualInputMenuitem.setVisible(true);
 		}
 		return true;
@@ -190,57 +169,18 @@ public class ScanActivity extends Activity {
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		Intent intent;
+		super.onOptionsItemSelected(item);
 		switch (item.getItemId()) {
 		case R.id.menu_manual_input:
-			running = false;
-			alertDialogBuilder = new AlertDialog.Builder(ScanActivity.this);
-			alertDialogBuilder
-					.setTitle(getString(R.string.dialog_title_manual_input));
-			alertDialogBuilder
-					.setMessage(getString(R.string.dialog_msg_manual_input));
-
-			final EditText input = new EditText(this);
-
-			InputFilter[] filterArray = new InputFilter[1];
-			filterArray[0] = new InputFilter.LengthFilter(13);
-			input.setFilters(filterArray);
-			input.setRawInputType(Configuration.KEYBOARD_QWERTY);
-			input.setSingleLine(true);
-			alertDialogBuilder.setView(input);
-			alertDialogBuilder.setPositiveButton("Ok",
-					new DialogInterface.OnClickListener() {
-						public void onClick(DialogInterface dialog,
-								int whichButton) {
-							barcode = input.getText().toString();
-
-							processBarcode(barcode);
-							running = true;
-						}
-					});
-
-			alertDialogBuilder.setNegativeButton("Cancel",
-					new DialogInterface.OnClickListener() {
-						public void onClick(DialogInterface dialog,
-								int whichButton) {
-							running = true;
-						}
-					});
-			alertDialog = alertDialogBuilder.create();
+			alertDialog = DialogHelper.createAlertDialogById(
+					ScanActivity.this, DialogHelper.MANUAL_INPUT_DIALOG);
 			alertDialog.show();
 			break;
 
-		case R.id.menu_logout:
-			intent = new Intent(ScanActivity.this, LoginActivity.class);
-			startActivity(intent);
-			finish();
-			break;
-
 		case R.id.menu_settings:
-			intent = new Intent(ScanActivity.this, SettingsActivity.class);
-			intent.putExtra("previousActivity", getClass().getName());
+			Intent intent = new Intent(ScanActivity.this,
+					SettingsActivity.class);
 			startActivity(intent);
-			finish();
 			break;
 
 		case R.id.menu_flashlight:
@@ -257,36 +197,13 @@ public class ScanActivity extends Activity {
 
 			break;
 
-		case R.id.menu_exit:
-			positiveButtonListener = new DialogInterface.OnClickListener() {
-				public void onClick(DialogInterface dialog, int id) {
-					finish();
-				}
-			};
-			negativeButtonListener = new DialogInterface.OnClickListener() {
-				public void onClick(DialogInterface dialog, int id) {
-					dialog.cancel();
-				}
-			};
-
-			dialogHandlers.put(DialogHelper.DIALOG_POSITIVE_BUTTON_LISTENER,
-					positiveButtonListener);
-			dialogHandlers.put(DialogHelper.DIALOG_NEGATIVE_BUTTON_LISTENER,
-					negativeButtonListener);
-
-			alertDialog = DialogHelper.createAlertDialogById(ScanActivity.this,
-					DialogHelper.EXIT_DIALOG, dialogHandlers);
-			alertDialog.show();
+		case R.id.menu_pause_scanning:
+			running = false;
+			invalidateOptionsMenu();
+			startScanningView.setVisibility(View.VISIBLE);
 			break;
 		}
-
 		return true;
-	}
-
-	@Override
-	protected void onPause() {
-		super.onPause();
-		releaseCamera();
 	}
 
 	public static Camera getCameraInstance() {
@@ -301,9 +218,9 @@ public class ScanActivity extends Activity {
 	private void releaseCamera() {
 		if (mCamera != null) {
 			mCamera.setPreviewCallback(null);
+			mPreview.getHolder().removeCallback(mPreview);
 			mCamera.release();
 			mCamera = null;
-
 		}
 	}
 
@@ -311,8 +228,9 @@ public class ScanActivity extends Activity {
 		View.OnClickListener onClickListener = new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				scanDialog.dismiss();
+				alertDialog.dismiss();
 				running = true;
+				invalidateOptionsMenu();
 				mCamera.setPreviewCallback(previewCb);
 			}
 		};
@@ -320,10 +238,11 @@ public class ScanActivity extends Activity {
 
 		if (barcode.length() == 13) {
 			if (!validChecksum(barcode)) {
-				scanDialog = DialogHelper.createInvalidScanAlertDialog(
-						ScanActivity.this, DialogHelper.INVALID_BARCODE_DIALOG,
-						viewHandlers, barcode);
-				scanDialog.show();
+				alertDialog = DialogHelper.createInvalidScanAlertDialog(
+						ScanActivity.this,
+						DialogHelper.INVALID_BARCODE_DIALOG, viewHandlers,
+						barcode);
+				alertDialog.show();
 
 				mediaPlayer = MediaPlayer.create(ScanActivity.this,
 						R.raw.invalid);
@@ -359,11 +278,11 @@ public class ScanActivity extends Activity {
 
 			if (cursor.getCount() == 0) {
 				// barcode not found error
-				scanDialog = DialogHelper.createInvalidScanAlertDialog(
+				alertDialog = DialogHelper.createInvalidScanAlertDialog(
 						ScanActivity.this,
 						DialogHelper.BARCODE_NOT_FOUND_DIALOG, viewHandlers,
 						barcode);
-				scanDialog.show();
+				alertDialog.show();
 
 				mediaPlayer = MediaPlayer.create(ScanActivity.this,
 						R.raw.invalid);
@@ -380,11 +299,12 @@ public class ScanActivity extends Activity {
 				for (PaymentCode payCode : PaymentCode.values()) {
 					if (payCode.getCode() == payStatus) {
 						// payment error
-						scanDialog = DialogHelper.createInvalidScanAlertDialog(
-								ScanActivity.this,
-								DialogHelper.PAYMENT_ERROR_DIALOG,
-								viewHandlers, barcode);
-						scanDialog.show();
+						alertDialog = DialogHelper
+								.createInvalidScanAlertDialog(
+										ScanActivity.this,
+										DialogHelper.PAYMENT_ERROR_DIALOG,
+										viewHandlers, barcode);
+						alertDialog.show();
 
 						mediaPlayer = MediaPlayer.create(ScanActivity.this,
 								R.raw.invalid);
@@ -402,11 +322,11 @@ public class ScanActivity extends Activity {
 							.getString(cursor
 									.getColumnIndex(ScanwareLiteOpenHelper.BARCODES_KEY_SEENDATE));
 
-					scanDialog = DialogHelper.createInvalidScanAlertDialog(
+					alertDialog = DialogHelper.createInvalidScanAlertDialog(
 							ScanActivity.this,
 							DialogHelper.ALREADY_SEEN_DIALOG, viewHandlers,
 							barcode, seenDate);
-					scanDialog.show();
+					alertDialog.show();
 
 					mediaPlayer = MediaPlayer.create(ScanActivity.this,
 							R.raw.invalid);
@@ -424,9 +344,9 @@ public class ScanActivity extends Activity {
 				if (!allowed) {
 					// filtered product error
 
-					scanDialog = DialogHelper.createDisabledScanAlertDialog(
+					alertDialog = DialogHelper.createDisabledScanAlertDialog(
 							ScanActivity.this, viewHandlers, barcode, product);
-					scanDialog.show();
+					alertDialog.show();
 
 					mediaPlayer = MediaPlayer.create(ScanActivity.this,
 							R.raw.invalid);
@@ -438,10 +358,10 @@ public class ScanActivity extends Activity {
 							.getString(cursor
 									.getColumnIndex(ScanwareLiteOpenHelper.BARCODES_KEY_NAME));
 
-					scanDialog = DialogHelper.createValidScanAlertDialog(
+					alertDialog = DialogHelper.createValidScanAlertDialog(
 							ScanActivity.this, viewHandlers, barcode, product,
 							name);
-					scanDialog.show();
+					alertDialog.show();
 
 					mediaPlayer = MediaPlayer.create(ScanActivity.this,
 							R.raw.valid);
@@ -519,5 +439,67 @@ public class ScanActivity extends Activity {
 
 	public void setRunning(boolean running) {
 		this.running = running;
+		invalidateOptionsMenu();
+	}
+
+	private class InitCameraTask extends AsyncTask<Void, Void, Void> {
+
+		@Override
+		protected void onPreExecute() {
+			alertDialog = DialogHelper.createAlertDialogById(
+					ScanActivity.this, DialogHelper.INIT_CAMERA_DIALOG);
+			alertDialog.show();
+			setContentView(R.layout.activity_scann);
+			startScanningView = (TextView) findViewById(R.id.textView_start_scanning);
+		}
+
+		@Override
+		protected void onPostExecute(Void result) {
+
+			startScanningView = (TextView) findViewById(R.id.textView_start_scanning);
+
+			autoFocusHandler = new Handler();
+
+			alertDialog.dismiss();
+		}
+
+		@Override
+		protected Void doInBackground(Void... params) {
+			mCamera = getCameraInstance();
+
+			scanner = new ImageScanner();
+			scanner.setConfig(0, Config.X_DENSITY, 3);
+			scanner.setConfig(0, Config.Y_DENSITY, 3);
+			runOnUiThread(new Runnable() {
+				public void run() {
+					FrameLayout preview = (FrameLayout) findViewById(R.id.camera_preview);
+					mPreview = new CameraPreview(ScanActivity.this, mCamera,
+							previewCb, autoFocusCB);
+					preview.addView(mPreview);
+					mCamera.startPreview();
+					if (!running) {
+						startScanningView.setVisibility(View.VISIBLE);
+					}
+					mPreview.setOnClickListener(new OnClickListener() {
+
+						@Override
+						public void onClick(View v) {
+							if (!running) {
+								Toast.makeText(ScanActivity.this,
+										"Starting to scan", Toast.LENGTH_LONG)
+										.show();
+								running = true;
+								invalidateOptionsMenu();
+								startScanningView.setVisibility(View.GONE);
+							}
+						}
+					});
+
+				}
+			});
+
+			return null;
+		}
+
 	}
 }

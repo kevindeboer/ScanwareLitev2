@@ -31,4 +31,5 @@ public class ScanwareLiteApplication extends Application {
 	public void setPassword(String password) {
 		this.password = password;
 	}
+
 }
