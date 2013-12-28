@@ -63,7 +63,7 @@ public class LoginActivity extends Activity {
 	private String username;
 	private String password;
 
-	private final String userFile = "user";
+	private String userFile;
 
 	private SharedPreferences settings;
 	private SharedPreferences.Editor editor;
@@ -81,6 +81,7 @@ public class LoginActivity extends Activity {
 		loginButton = (Button) findViewById(R.id.button_login);
 		usernameView = (EditText) findViewById(R.id.editText_username);
 		passwordView = (EditText) findViewById(R.id.editText_password);
+		userFile = settings.getString(PreferenceHelper.KEY_USER_FILE, null);
 	}
 
 	protected void onResume() {

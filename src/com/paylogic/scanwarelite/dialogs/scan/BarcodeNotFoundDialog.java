@@ -10,7 +10,7 @@ import android.widget.TextView;
 import com.paylogic.scanwarelite.R;
 import com.paylogic.scanwarelite.activities.ScanActivity;
 
-public class InvalidBarcodeDialog extends AlertDialog.Builder {
+public class BarcodeNotFoundDialog extends AlertDialog.Builder {
 	private Resources resources;
 	private LayoutInflater li;
 	private TextView scanResultTitleView;
@@ -18,7 +18,7 @@ public class InvalidBarcodeDialog extends AlertDialog.Builder {
 	private TextView scanResultMessageView;
 	private ScanActivity scanActivity;
 	
-	public InvalidBarcodeDialog(final Context context, String barcode) {
+	public BarcodeNotFoundDialog(final Context context, String barcode) {
 		super(context);
 		scanActivity = (ScanActivity) context;
 		
@@ -43,7 +43,7 @@ public class InvalidBarcodeDialog extends AlertDialog.Builder {
 		scanResultBarcodeView.setText(String.format(context.getString(
 				R.string.tv_scan_dialog_barcode, barcode)));
 		scanResultMessageView.setText(context
-				.getString(R.string.tv_scan_dialog_msg_invalid_checksum));
+				.getString(R.string.tv_scan_dialog_msg_not_found));
 		
 		scanDialogView.setOnClickListener(new View.OnClickListener() {
 			@Override

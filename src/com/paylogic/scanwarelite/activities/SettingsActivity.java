@@ -1,7 +1,5 @@
 package com.paylogic.scanwarelite.activities;
 
-import android.content.DialogInterface;
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -10,18 +8,15 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 
 import com.paylogic.scanwarelite.R;
-import com.paylogic.scanwarelite.helpers.DialogHelper;
-import com.paylogic.scanwarelite.helpers.ScanwareLiteOpenHelper;
+import com.paylogic.scanwarelite.dialogs.settings.DeleteDataDialog;
 
 public class SettingsActivity extends CommonActivity {
 	private Button deleteAllDataButton;
-	private String userFileName = "user";
 
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_settings);
 		deleteAllDataButton = (Button) findViewById(R.id.button_delete_all_data);
-
 	}
 
 	protected void onResume() {
@@ -30,44 +25,17 @@ public class SettingsActivity extends CommonActivity {
 
 			@Override
 			public void onClick(View v) {
-				positiveButtonListener = new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int whichButton) {
-
-						deleteFile(userFileName);
-						deleteDatabase(ScanwareLiteOpenHelper.DATABASE_NAME);
-
-						app.setUserId(-1);
-						app.setUsername(null);
-						app.setPassword(null);
-
-						Intent intent = new Intent(SettingsActivity.this,
-								LoginActivity.class);
-						startActivity(intent);
-						finish();
-					}
-				};
-
-				negativeButtonListener = new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int whichButton) {
-						alertDialog.dismiss();
-					}
-				};
-
-				dialogHandlers.put(
-						DialogHelper.DIALOG_POSITIVE_BUTTON_LISTENER,
-						positiveButtonListener);
-				dialogHandlers.put(
-						DialogHelper.DIALOG_NEGATIVE_BUTTON_LISTENER,
-						negativeButtonListener);
-
-				alertDialog = DialogHelper.createAlertDialogById(
-						SettingsActivity.this, DialogHelper.DELETE_DATA_DIALOG,
-						dialogHandlers);
+		
+				alertDialog = new DeleteDataDialog(SettingsActivity.this).create();
 				alertDialog.show();
 			}
 		});
 	}
-
+	
+	public void dismissDialog(){
+		alertDialog.cancel();
+	}
+	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		super.onCreateOptionsMenu(menu);

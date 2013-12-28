@@ -24,7 +24,6 @@ import android.media.MediaPlayer;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.SparseArray;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -36,6 +35,13 @@ import android.widget.Toast;
 
 import com.paylogic.scanwarelite.PaymentCode;
 import com.paylogic.scanwarelite.R;
+import com.paylogic.scanwarelite.dialogs.scan.AlreadySeenDialog;
+import com.paylogic.scanwarelite.dialogs.scan.BarcodeNotFoundDialog;
+import com.paylogic.scanwarelite.dialogs.scan.DisabledProductDialog;
+import com.paylogic.scanwarelite.dialogs.scan.InitCameraDialog;
+import com.paylogic.scanwarelite.dialogs.scan.InvalidBarcodeDialog;
+import com.paylogic.scanwarelite.dialogs.scan.PaymentErrorDialog;
+import com.paylogic.scanwarelite.dialogs.scan.ValidProductDialog;
 import com.paylogic.scanwarelite.helpers.DialogHelper;
 import com.paylogic.scanwarelite.helpers.ScanwareLiteOpenHelper;
 import com.paylogic.scanwarelite.views.CameraPreview;
@@ -50,7 +56,6 @@ public class ScanActivity extends CommonActivity {
 	private Camera mCamera;
 	private ImageScanner scanner;
 	private InitCameraTask initCameraTask;
-	private SparseArray<View.OnClickListener> viewHandlers = new SparseArray<View.OnClickListener>();
 	private MediaPlayer mediaPlayer;
 	private boolean hasFlashlight;
 	private boolean flashlightEnabled;
@@ -136,14 +141,15 @@ public class ScanActivity extends CommonActivity {
 	public boolean onPrepareOptionsMenu(Menu menu) {
 		MenuItem flashlightMenuItem = menu.findItem(R.id.menu_flashlight);
 		MenuItem manualInputMenuitem = menu.findItem(R.id.menu_manual_input);
-		MenuItem pauseScanningMenuItem = menu.findItem(R.id.menu_pause_scanning);
-		
-		if(running){
+		MenuItem pauseScanningMenuItem = menu
+				.findItem(R.id.menu_pause_scanning);
+
+		if (running) {
 			Toast.makeText(this, "true", Toast.LENGTH_LONG).show();
-		}else {
+		} else {
 			Toast.makeText(this, "false", Toast.LENGTH_LONG).show();
 		}
-		
+
 		if (hasFlashlight) {
 			if (!flashlightEnabled) {
 				flashlightMenuItem.setTitle(resources
@@ -159,7 +165,7 @@ public class ScanActivity extends CommonActivity {
 		if (!running) {
 			pauseScanningMenuItem.setVisible(false);
 			manualInputMenuitem.setVisible(false);
-			
+
 		} else {
 			pauseScanningMenuItem.setVisible(true);
 			manualInputMenuitem.setVisible(true);
@@ -172,8 +178,8 @@ public class ScanActivity extends CommonActivity {
 		super.onOptionsItemSelected(item);
 		switch (item.getItemId()) {
 		case R.id.menu_manual_input:
-			alertDialog = DialogHelper.createAlertDialogById(
-					ScanActivity.this, DialogHelper.MANUAL_INPUT_DIALOG);
+			alertDialog = DialogHelper.createAlertDialogById(ScanActivity.this,
+					DialogHelper.MANUAL_INPUT_DIALOG);
 			alertDialog.show();
 			break;
 
@@ -224,24 +230,18 @@ public class ScanActivity extends CommonActivity {
 		}
 	}
 
-	public void processBarcode(String barcode) {
-		View.OnClickListener onClickListener = new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				alertDialog.dismiss();
-				running = true;
-				invalidateOptionsMenu();
-				mCamera.setPreviewCallback(previewCb);
-			}
-		};
-		viewHandlers.put(DialogHelper.VIEW_ON_CLICK_LISTENER, onClickListener);
+	public void dismissScanDialog() {
+		alertDialog.dismiss();
+		running = true;
+		invalidateOptionsMenu();
+		mCamera.setPreviewCallback(previewCb);
+	}
 
+	public void processBarcode(String barcode) {
 		if (barcode.length() == 13) {
 			if (!validChecksum(barcode)) {
-				alertDialog = DialogHelper.createInvalidScanAlertDialog(
-						ScanActivity.this,
-						DialogHelper.INVALID_BARCODE_DIALOG, viewHandlers,
-						barcode);
+				alertDialog = new InvalidBarcodeDialog(ScanActivity.this,
+						barcode).create();
 				alertDialog.show();
 
 				mediaPlayer = MediaPlayer.create(ScanActivity.this,
@@ -278,10 +278,8 @@ public class ScanActivity extends CommonActivity {
 
 			if (cursor.getCount() == 0) {
 				// barcode not found error
-				alertDialog = DialogHelper.createInvalidScanAlertDialog(
-						ScanActivity.this,
-						DialogHelper.BARCODE_NOT_FOUND_DIALOG, viewHandlers,
-						barcode);
+				alertDialog = new BarcodeNotFoundDialog(ScanActivity.this,
+						barcode).create();
 				alertDialog.show();
 
 				mediaPlayer = MediaPlayer.create(ScanActivity.this,
@@ -299,11 +297,8 @@ public class ScanActivity extends CommonActivity {
 				for (PaymentCode payCode : PaymentCode.values()) {
 					if (payCode.getCode() == payStatus) {
 						// payment error
-						alertDialog = DialogHelper
-								.createInvalidScanAlertDialog(
-										ScanActivity.this,
-										DialogHelper.PAYMENT_ERROR_DIALOG,
-										viewHandlers, barcode);
+						alertDialog = new PaymentErrorDialog(ScanActivity.this,
+								barcode).create();
 						alertDialog.show();
 
 						mediaPlayer = MediaPlayer.create(ScanActivity.this,
@@ -322,10 +317,8 @@ public class ScanActivity extends CommonActivity {
 							.getString(cursor
 									.getColumnIndex(ScanwareLiteOpenHelper.BARCODES_KEY_SEENDATE));
 
-					alertDialog = DialogHelper.createInvalidScanAlertDialog(
-							ScanActivity.this,
-							DialogHelper.ALREADY_SEEN_DIALOG, viewHandlers,
-							barcode, seenDate);
+					alertDialog = new AlreadySeenDialog(ScanActivity.this,
+							barcode, seenDate).create();
 					alertDialog.show();
 
 					mediaPlayer = MediaPlayer.create(ScanActivity.this,
@@ -344,8 +337,8 @@ public class ScanActivity extends CommonActivity {
 				if (!allowed) {
 					// filtered product error
 
-					alertDialog = DialogHelper.createDisabledScanAlertDialog(
-							ScanActivity.this, viewHandlers, barcode, product);
+					alertDialog = new DisabledProductDialog(ScanActivity.this,
+							barcode, product).create();
 					alertDialog.show();
 
 					mediaPlayer = MediaPlayer.create(ScanActivity.this,
@@ -358,9 +351,8 @@ public class ScanActivity extends CommonActivity {
 							.getString(cursor
 									.getColumnIndex(ScanwareLiteOpenHelper.BARCODES_KEY_NAME));
 
-					alertDialog = DialogHelper.createValidScanAlertDialog(
-							ScanActivity.this, viewHandlers, barcode, product,
-							name);
+					alertDialog = new ValidProductDialog(ScanActivity.this,
+							barcode, product, name).create();
 					alertDialog.show();
 
 					mediaPlayer = MediaPlayer.create(ScanActivity.this,
@@ -446,10 +438,9 @@ public class ScanActivity extends CommonActivity {
 
 		@Override
 		protected void onPreExecute() {
-			alertDialog = DialogHelper.createAlertDialogById(
-					ScanActivity.this, DialogHelper.INIT_CAMERA_DIALOG);
+			alertDialog = new InitCameraDialog(ScanActivity.this).create();
 			alertDialog.show();
-			setContentView(R.layout.activity_scann);
+			setContentView(R.layout.activity_scan);
 			startScanningView = (TextView) findViewById(R.id.textView_start_scanning);
 		}
 

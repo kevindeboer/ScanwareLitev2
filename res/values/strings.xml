@@ -8,7 +8,8 @@
     <string name="dialog_msg_confirm_exit">Do you wish to exit the application?</string>
     <string name="dialog_title_confirm_exit">Confirm exit</string>
     <string name="dialog_btn_cancel">Cancel</string>
-
+	<string name="dialog_btn_ok">OK</string>
+	
     <!-- Login -->
     <string name="btn_login">Login</string>
     <string name="et_password_hint">adgj</string>
@@ -90,7 +91,7 @@
     <string name="btn_delete_all_data">Delete all data</string>
     <string name="dialog_title_delete_data">Warning</string>
     <string name="dialog_msg_delete_data">This will delete all event and user data. \n You will be logged out, and require internet connection to log in again.</string>
-    <string name="dialog_btn_ok">OK</string>
+    
 
     <!-- Menu -->
     <string name="menu_item_show_all_events">Show all events</string>

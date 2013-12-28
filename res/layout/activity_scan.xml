@@ -5,14 +5,15 @@
     android:orientation="vertical" >
 
     <include layout="@layout/camera_preview" />
-	<TextView
+    <TextView
         android:id="@+id/textView_start_scanning"
         android:layout_width="match_parent"
         android:layout_height="75dp"
+        android:layout_alignParentBottom="true"
+        android:background="#AAFFFFFF"
         android:gravity="center"
         android:text="@string/tv_tap_to_start"
         android:textAppearance="?android:attr/textAppearanceSmall" 
-        android:layout_alignParentBottom="true"
-        android:background="#AAFFFFFF"/>
-	
+        android:visibility="gone"/>
+
 </RelativeLayout>
