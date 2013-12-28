@@ -15,7 +15,7 @@ import android.view.MenuItem;
 
 import com.paylogic.scanwarelite.R;
 import com.paylogic.scanwarelite.ScanwareLiteApplication;
-import com.paylogic.scanwarelite.helpers.DialogHelper;
+import com.paylogic.scanwarelite.dialogs.menu.ExitDialog;
 import com.paylogic.scanwarelite.helpers.ScanwareLiteOpenHelper;
 
 public class CommonActivity extends Activity {
@@ -83,33 +83,14 @@ public class CommonActivity extends Activity {
 			break;
 
 		case R.id.menu_exit:
-			positiveButtonListener = new DialogInterface.OnClickListener() {
-				public void onClick(DialogInterface dialog, int id) {
-					logout();
-					moveTaskToBack(true);
-				}
-			};
-			negativeButtonListener = new DialogInterface.OnClickListener() {
-				public void onClick(DialogInterface dialog, int id) {
-					dialog.cancel();
-				}
-			};
-
-			dialogHandlers.put(DialogHelper.DIALOG_POSITIVE_BUTTON_LISTENER,
-					positiveButtonListener);
-			dialogHandlers.put(DialogHelper.DIALOG_NEGATIVE_BUTTON_LISTENER,
-					negativeButtonListener);
-
-			alertDialog = DialogHelper.createAlertDialogById(
-					CommonActivity.this, DialogHelper.EXIT_DIALOG,
-					dialogHandlers);
+			alertDialog = new ExitDialog(CommonActivity.this).create();
 			alertDialog.show();
 			break;
 		}
 		return true;
 	}
 
-	private void logout() {
+	public void logout() {
 		Intent intent = new Intent(CommonActivity.this, LoginActivity.class);
 		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		startActivity(intent);

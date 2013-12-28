@@ -2,7 +2,6 @@ package com.paylogic.scanwarelite.helpers;
 
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
@@ -25,14 +24,13 @@ public class DialogHelper {
 	public static final int DIALOG_NEGATIVE_BUTTON_LISTENER = 302;
 	public static final int VIEW_ON_CLICK_LISTENER = 303;
 	
-	// Dialogs used in menus
-	public static final int EXIT_DIALOG = 16;
-	public static final int MANUAL_INPUT_DIALOG = 17;
+
 
 	// Dialogs used in SettingsActivity
 	public static final int DELETE_DATA_DIALOG = 18;
 
 	// Dialogs used in ScanActivity
+	public static final int MANUAL_INPUT_DIALOG = 17;
 	public static final int INVALID_BARCODE_DIALOG = 19;
 	public static final int BARCODE_NOT_FOUND_DIALOG = 20;
 	public static final int PAYMENT_ERROR_DIALOG = 21;
@@ -61,10 +59,6 @@ public class DialogHelper {
 				context);
 
 		switch (id) {
-		case EXIT_DIALOG:
-			alertDialogBuilder = createExitDialog(context, dialogHandlers,
-					alertDialogBuilder);
-			break;
 		case INIT_CAMERA_DIALOG:
 			alertDialogBuilder = createInitCameraDialog(context,
 					alertDialogBuilder);
@@ -278,21 +272,4 @@ public class DialogHelper {
 				});
 		return alertDialogBuilder;
 	}
-
-	private static AlertDialog.Builder createExitDialog(Context context,
-			SparseArray<OnClickListener> dialogHandlers,
-			AlertDialog.Builder alertDialogBuilder) {
-		alertDialogBuilder.setTitle(context
-				.getString(R.string.dialog_title_confirm_exit));
-		alertDialogBuilder.setMessage(context
-				.getString(R.string.dialog_msg_confirm_exit));
-		alertDialogBuilder.setPositiveButton(
-				context.getString(R.string.dialog_btn_exit),
-				dialogHandlers.get(DIALOG_POSITIVE_BUTTON_LISTENER));
-		alertDialogBuilder.setNegativeButton(
-				context.getString(R.string.dialog_btn_cancel),
-				dialogHandlers.get(DIALOG_NEGATIVE_BUTTON_LISTENER));
-		return alertDialogBuilder;
-	}
-
 }
