@@ -35,6 +35,7 @@ import android.widget.EditText;
 import com.paylogic.scanwarelite.ApiResponse;
 import com.paylogic.scanwarelite.R;
 import com.paylogic.scanwarelite.ScanwareLiteApplication;
+import com.paylogic.scanwarelite.dialogs.EmptyInputDialog;
 import com.paylogic.scanwarelite.helpers.ConnectivityHelper;
 import com.paylogic.scanwarelite.helpers.DialogHelper;
 import com.paylogic.scanwarelite.helpers.PreferenceHelper;
@@ -89,9 +90,7 @@ public class LoginActivity extends Activity {
 
 				// if both inputs are empty
 				if (username.length() == 0 && password.length() == 0) {
-					alertDialog = DialogHelper
-							.createAlertDialogById(LoginActivity.this,
-									DialogHelper.EMPTY_INPUT_DIALOG);
+					alertDialog = new EmptyInputDialog(LoginActivity.this).create();
 					alertDialog.show();
 					return;
 				}
