@@ -42,7 +42,6 @@ import com.paylogic.scanwarelite.dialogs.login.InvalidCredentialsDialog;
 import com.paylogic.scanwarelite.dialogs.login.LoginDialog;
 import com.paylogic.scanwarelite.dialogs.login.NoLocalDataDialog;
 import com.paylogic.scanwarelite.helpers.ConnectivityHelper;
-import com.paylogic.scanwarelite.helpers.DialogHelper;
 import com.paylogic.scanwarelite.helpers.PreferenceHelper;
 import com.paylogic.scanwarelite.security.BCrypt;
 
@@ -81,7 +80,11 @@ public class LoginActivity extends Activity {
 		loginButton = (Button) findViewById(R.id.button_login);
 		usernameView = (EditText) findViewById(R.id.editText_username);
 		passwordView = (EditText) findViewById(R.id.editText_password);
-		userFile = settings.getString(PreferenceHelper.KEY_USER_FILE, null);
+		userFile = "user";
+		
+		editor = settings.edit();
+		editor.putString(PreferenceHelper.KEY_USER_FILE, userFile);
+		editor.commit();
 	}
 
 	protected void onResume() {

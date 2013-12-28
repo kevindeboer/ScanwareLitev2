@@ -40,9 +40,9 @@ import com.paylogic.scanwarelite.dialogs.scan.BarcodeNotFoundDialog;
 import com.paylogic.scanwarelite.dialogs.scan.DisabledProductDialog;
 import com.paylogic.scanwarelite.dialogs.scan.InitCameraDialog;
 import com.paylogic.scanwarelite.dialogs.scan.InvalidBarcodeDialog;
+import com.paylogic.scanwarelite.dialogs.scan.ManualInputDialog;
 import com.paylogic.scanwarelite.dialogs.scan.PaymentErrorDialog;
 import com.paylogic.scanwarelite.dialogs.scan.ValidProductDialog;
-import com.paylogic.scanwarelite.helpers.DialogHelper;
 import com.paylogic.scanwarelite.helpers.ScanwareLiteOpenHelper;
 import com.paylogic.scanwarelite.views.CameraPreview;
 
@@ -144,12 +144,6 @@ public class ScanActivity extends CommonActivity {
 		MenuItem pauseScanningMenuItem = menu
 				.findItem(R.id.menu_pause_scanning);
 
-		if (running) {
-			Toast.makeText(this, "true", Toast.LENGTH_LONG).show();
-		} else {
-			Toast.makeText(this, "false", Toast.LENGTH_LONG).show();
-		}
-
 		if (hasFlashlight) {
 			if (!flashlightEnabled) {
 				flashlightMenuItem.setTitle(resources
@@ -178,8 +172,7 @@ public class ScanActivity extends CommonActivity {
 		super.onOptionsItemSelected(item);
 		switch (item.getItemId()) {
 		case R.id.menu_manual_input:
-			alertDialog = DialogHelper.createAlertDialogById(ScanActivity.this,
-					DialogHelper.MANUAL_INPUT_DIALOG);
+			alertDialog = new ManualInputDialog(ScanActivity.this).create();
 			alertDialog.show();
 			break;
 
