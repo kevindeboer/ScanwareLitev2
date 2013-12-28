@@ -45,8 +45,8 @@
     <string name="dialog_msg_retrieving_event_data">Please wait, this may take a while depending on how many tickets have been sold</string>
     <string name="dialog_msg_retrieving_events">Please wait&#8230;</string>
     <string name="dialog_msg_reuse_or_overwrite">Would you like to overwrite with new data, or reuse the current data? </string>
-    <string name="dialog_msg_not_enough_disk_space">There is not enough internal disk space available to download the event data</string>
-    <string name="dialog_title_not_enough_disk_space">Not enough internal disk space</string>
+    <string name="dialog_msg_insufficient_storage">There is not enough internal disk space available to download the event data</string>
+    <string name="dialog_title_insufficient_storage">Not enough internal disk space</string>
     <string name="dialog_title_confirm_download">Confirm download</string>
     <string name="dialog_title_downloading_event_data">"Downloading data for event: "</string>
     <string name="dialog_title_error_500">Error</string>

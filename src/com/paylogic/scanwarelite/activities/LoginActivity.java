@@ -73,7 +73,7 @@ public class LoginActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_login);
 
-		app = (ScanwareLiteApplication) getApplicationContext();
+		app = (ScanwareLiteApplication) getApplication();
 
 		settings = getSharedPreferences(PreferenceHelper.PREFS_FILE,
 				Context.MODE_PRIVATE);
@@ -231,10 +231,10 @@ public class LoginActivity extends Activity {
 
 						String salt = BCrypt.gensalt();
 
-						// usernameHash = BCrypt.hashpw(username, salt);
-						// passwordHash = BCrypt.hashpw(password, salt);
-						usernameHash = "asdasd";
-						passwordHash = "asdasd";
+						usernameHash = BCrypt.hashpw(username, salt);
+						passwordHash = BCrypt.hashpw(password, salt);
+						// usernameHash = "asdasd";
+						// passwordHash = "asdasd";
 						response = ApiResponse.OK;
 					}
 				}
@@ -282,7 +282,8 @@ public class LoginActivity extends Activity {
 				alertDialog.show();
 
 			} else if (result == NO_LOCAL_DATA) {
-				alertDialog = new NoLocalDataDialog(LoginActivity.this).create();
+				alertDialog = new NoLocalDataDialog(LoginActivity.this)
+						.create();
 				alertDialog.show();
 			}
 		}

@@ -19,9 +19,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
@@ -46,8 +44,16 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.paylogic.scanwarelite.R;
+import com.paylogic.scanwarelite.dialogs.events.DownloadDialog;
+import com.paylogic.scanwarelite.dialogs.events.DownloadSpqDialog;
+import com.paylogic.scanwarelite.dialogs.events.Error500Dialog;
+import com.paylogic.scanwarelite.dialogs.events.GetEventsDialog;
+import com.paylogic.scanwarelite.dialogs.events.InsufficientStorageDialog;
+import com.paylogic.scanwarelite.dialogs.events.NoResourcesDialog;
+import com.paylogic.scanwarelite.dialogs.events.OnlyReuseDialog;
+import com.paylogic.scanwarelite.dialogs.events.OverwriteDialog;
+import com.paylogic.scanwarelite.dialogs.events.ReuseOrOverwriteDialog;
 import com.paylogic.scanwarelite.helpers.ConnectivityHelper;
-import com.paylogic.scanwarelite.helpers.DialogHelper;
 import com.paylogic.scanwarelite.helpers.PreferenceHelper;
 import com.paylogic.scanwarelite.helpers.ScanwareLiteOpenHelper;
 import com.paylogic.scanwarelite.models.Event;
@@ -63,7 +69,6 @@ public class EventsActivity extends CommonActivity {
 	private EventsAdapter events_adapter;
 	private Event selectedEvent;
 
-	private DownloadSpqTask spqTask;
 	private GetEventsTask eventsTask;
 
 	private String username;
@@ -131,135 +136,23 @@ public class EventsActivity extends CommonActivity {
 					if (selectedEvent.getId() == existingEventId) {
 						if (!ConnectivityHelper
 								.isConnected(EventsActivity.this)) {
-
-							positiveButtonListener = new DialogInterface.OnClickListener() {
-								public void onClick(DialogInterface dialog,
-										int id) {
-									Intent intent = new Intent(
-											EventsActivity.this,
-											ProductsActivity.class);
-									startActivity(intent);
-
-								}
-							};
-							negativeButtonListener = new DialogInterface.OnClickListener() {
-								public void onClick(DialogInterface dialog,
-										int id) {
-									dialog.cancel();
-								}
-							};
-
-							dialogHandlers
-									.put(DialogHelper.DIALOG_POSITIVE_BUTTON_LISTENER,
-											positiveButtonListener);
-							dialogHandlers
-									.put(DialogHelper.DIALOG_NEGATIVE_BUTTON_LISTENER,
-											negativeButtonListener);
-
-							alertDialog = (AlertDialog) DialogHelper
-									.createAlertDialogById(EventsActivity.this,
-											DialogHelper.ONLY_REUSE_DIALOG,
-											dialogHandlers);
+							alertDialog = new OnlyReuseDialog(
+									EventsActivity.this).create();
 							alertDialog.show();
-
 						} else {
-
-							DialogInterface.OnClickListener positiveButtonListener = new DialogInterface.OnClickListener() {
-								public void onClick(DialogInterface dialog,
-										int id) {
-									spqTask = new DownloadSpqTask(username,
-											password, selectedEvent);
-									spqTask.execute();
-								}
-							};
-							neutralButtonListener = new DialogInterface.OnClickListener() {
-								public void onClick(DialogInterface dialog,
-										int id) {
-									Intent intent = new Intent(
-											EventsActivity.this,
-											ProductsActivity.class);
-									startActivity(intent);
-
-								}
-							};
-
-							negativeButtonListener = new DialogInterface.OnClickListener() {
-								public void onClick(DialogInterface dialog,
-										int id) {
-									dialog.cancel();
-								}
-							};
-
-							dialogHandlers
-									.put(DialogHelper.DIALOG_POSITIVE_BUTTON_LISTENER,
-											positiveButtonListener);
-							dialogHandlers
-									.put(DialogHelper.DIALOG_NEUTRAL_BUTTON_LISTENER,
-											neutralButtonListener);
-							dialogHandlers
-									.put(DialogHelper.DIALOG_NEGATIVE_BUTTON_LISTENER,
-											negativeButtonListener);
-
-							alertDialog = DialogHelper.createAlertDialogById(
-									EventsActivity.this,
-									DialogHelper.REUSE_OR_OVERWRITE_DIALOG,
-									dialogHandlers);
+							alertDialog = new ReuseOrOverwriteDialog(
+									EventsActivity.this, selectedEvent)
+									.create();
 							alertDialog.show();
 
 						}
 					} else if (databaseExists()) {
-						positiveButtonListener = new DialogInterface.OnClickListener() {
-							public void onClick(DialogInterface dialog, int id) {
-								spqTask = new DownloadSpqTask(username,
-										password, selectedEvent);
-								spqTask.execute();
-							}
-						};
-
-						negativeButtonListener = new DialogInterface.OnClickListener() {
-							public void onClick(DialogInterface dialog, int id) {
-								dialog.cancel();
-							}
-						};
-
-						dialogHandlers.put(
-								DialogHelper.DIALOG_POSITIVE_BUTTON_LISTENER,
-								positiveButtonListener);
-						dialogHandlers.put(
-								DialogHelper.DIALOG_NEGATIVE_BUTTON_LISTENER,
-								negativeButtonListener);
-
-						alertDialog = DialogHelper.createAlertDialogById(
-								EventsActivity.this,
-								DialogHelper.OVERWRITE_DIALOG, dialogHandlers,
-								selectedEvent);
+						alertDialog = new OverwriteDialog(EventsActivity.this,
+								selectedEvent).create();
 						alertDialog.show();
-
 					} else {
-						positiveButtonListener = new DialogInterface.OnClickListener() {
-							public void onClick(DialogInterface dialog, int id) {
-								spqTask = new DownloadSpqTask(username,
-										password, selectedEvent);
-								spqTask.execute();
-							}
-						};
-						negativeButtonListener = new DialogInterface.OnClickListener() {
-							public void onClick(DialogInterface dialog, int id) {
-								dialog.cancel();
-							}
-						};
-
-						dialogHandlers.put(
-								DialogHelper.DIALOG_POSITIVE_BUTTON_LISTENER,
-								positiveButtonListener);
-						dialogHandlers.put(
-								DialogHelper.DIALOG_NEGATIVE_BUTTON_LISTENER,
-								negativeButtonListener);
-
-						alertDialog = DialogHelper.createAlertDialogById(
-								EventsActivity.this,
-								DialogHelper.DOWNLOAD_DIALOG, dialogHandlers,
-								selectedEvent);
+						alertDialog = new DownloadDialog(EventsActivity.this,
+								selectedEvent).create();
 						alertDialog.show();
 					}
 				} else {
@@ -395,8 +288,7 @@ public class EventsActivity extends CommonActivity {
 
 		@Override
 		protected void onPreExecute() {
-			progressDialog = DialogHelper.createProgressDialogById(
-					EventsActivity.this, DialogHelper.GET_EVENTS_DIALOG);
+			progressDialog = new GetEventsDialog(EventsActivity.this);
 			progressDialog.show();
 
 			events.clear();
@@ -426,8 +318,8 @@ public class EventsActivity extends CommonActivity {
 				}
 
 			} else {
-				alertDialog = DialogHelper.createAlertDialogById(
-						EventsActivity.this, DialogHelper.NO_RESOURCES_DIALOG);
+				alertDialog = new NoResourcesDialog(EventsActivity.this)
+						.create();
 				alertDialog.show();
 			}
 
@@ -526,7 +418,7 @@ public class EventsActivity extends CommonActivity {
 		}
 	}
 
-	private class DownloadSpqTask extends AsyncTask<Event, Integer, Void> {
+	public class DownloadSpqTask extends AsyncTask<Event, Integer, Void> {
 		private String url = "https://api.paylogic.nl/API/?command=";
 		private String fileName = "event.spq";
 
@@ -546,8 +438,7 @@ public class EventsActivity extends CommonActivity {
 
 		@Override
 		protected void onPreExecute() {
-			progressDialog = DialogHelper.createProgressDialogById(
-					EventsActivity.this, DialogHelper.DOWNLOAD_SPQ_DIALOG);
+			progressDialog = new DownloadSpqDialog(EventsActivity.this);
 			progressDialog.show();
 
 			deleteDatabase(ScanwareLiteOpenHelper.DATABASE_NAME);
@@ -566,13 +457,10 @@ public class EventsActivity extends CommonActivity {
 				startActivity(intent);
 			} else {
 				if (errorCode == HttpURLConnection.HTTP_INTERNAL_ERROR) {
-					alertDialog = DialogHelper.createAlertDialogById(
-							EventsActivity.this, DialogHelper.ERROR_500_DIALOG);
-					alertDialog.show();
+					alertDialog = new Error500Dialog(EventsActivity.this)
+							.create();
 				} else if (errorCode == NOT_ENOUGH_DISK_SPACE) {
-					alertDialog = DialogHelper.createAlertDialogById(
-							EventsActivity.this,
-							DialogHelper.NOT_ENOUGH_DISK_SPACE_DIALOG);
+					alertDialog = new InsufficientStorageDialog(EventsActivity.this).create();
 					alertDialog.show();
 				}
 			}

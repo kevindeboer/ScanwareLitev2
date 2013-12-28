@@ -24,17 +24,7 @@ public class DialogHelper {
 	public static final int DIALOG_NEUTRAL_BUTTON_LISTENER = 301;
 	public static final int DIALOG_NEGATIVE_BUTTON_LISTENER = 302;
 	public static final int VIEW_ON_CLICK_LISTENER = 303;
-
-	// Dialogs used in EventsActivity
-	public static final int ONLY_REUSE_DIALOG = 7;
-	public static final int REUSE_OR_OVERWRITE_DIALOG = 8;
-	public static final int OVERWRITE_DIALOG = 9;
-	public static final int DOWNLOAD_DIALOG = 10;
-	public static final int NO_RESOURCES_DIALOG = 11;
-	public static final int GET_EVENTS_DIALOG = 12;
-	public static final int DOWNLOAD_SPQ_DIALOG = 13;
-	public static final int ERROR_500_DIALOG = 14;
-	public static final int NOT_ENOUGH_DISK_SPACE_DIALOG = 15;
+	
 	// Dialogs used in menus
 	public static final int EXIT_DIALOG = 16;
 	public static final int MANUAL_INPUT_DIALOG = 17;
@@ -71,35 +61,6 @@ public class DialogHelper {
 				context);
 
 		switch (id) {
-		case ONLY_REUSE_DIALOG:
-			alertDialogBuilder = createOnlyReuseDialog(context, dialogHandlers,
-					alertDialogBuilder);
-			break;
-		case REUSE_OR_OVERWRITE_DIALOG:
-			alertDialogBuilder = createReuseOrOverwriteDialog(context,
-					dialogHandlers, alertDialogBuilder);
-			break;
-		case OVERWRITE_DIALOG:
-			alertDialogBuilder = createOverwriteDialog(context, dialogHandlers,
-					event, alertDialogBuilder);
-			break;
-		case DOWNLOAD_DIALOG:
-			alertDialogBuilder = createDownloadDialog(context, dialogHandlers,
-					event, alertDialogBuilder);
-			break;
-		case NO_RESOURCES_DIALOG:
-			alertDialogBuilder = createNoResourcesDialog(context,
-					alertDialogBuilder);
-			break;
-
-		case ERROR_500_DIALOG:
-			alertDialogBuilder = createError500Dialog(context,
-					alertDialogBuilder);
-			break;
-		case NOT_ENOUGH_DISK_SPACE_DIALOG:
-			alertDialogBuilder = createNotEnoughDiskSpaceDialog(context,
-					alertDialogBuilder);
-			break;
 		case EXIT_DIALOG:
 			alertDialogBuilder = createExitDialog(context, dialogHandlers,
 					alertDialogBuilder);
@@ -263,32 +224,6 @@ public class DialogHelper {
 		return alertDialogBuilder.create();
 	}
 
-	public static ProgressDialog createProgressDialogById(Context context,
-			int id) {
-		ProgressDialog progressDialog = new ProgressDialog(context);
-
-		switch (id) {
-		case GET_EVENTS_DIALOG:
-			progressDialog.setTitle(context
-					.getString(R.string.dialog_title_retrieving_events));
-			progressDialog.setMessage(context
-					.getString(R.string.dialog_msg_retrieving_events));
-			progressDialog.setCancelable(false);
-			progressDialog.setIndeterminate(true);
-			break;
-		case DOWNLOAD_SPQ_DIALOG:
-			progressDialog.setTitle(context
-					.getString(R.string.dialog_title_retrieving_event_data));
-			progressDialog.setMessage(context
-					.getString(R.string.dialog_msg_retrieving_event_data));
-			progressDialog.setIndeterminate(true);
-			progressDialog.setCancelable(false);
-			progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-			break;
-		}
-		return progressDialog;
-	}
-
 	private static AlertDialog.Builder createDeleteDataDialog(Context context,
 			SparseArray<OnClickListener> dialogHandlers,
 			AlertDialog.Builder alertDialogBuilder) {
@@ -360,97 +295,4 @@ public class DialogHelper {
 		return alertDialogBuilder;
 	}
 
-	private static AlertDialog.Builder createNoResourcesDialog(Context context,
-			AlertDialog.Builder alertDialogBuilder) {
-		alertDialogBuilder.setTitle(context
-				.getString(R.string.dialog_title_no_resources));
-		alertDialogBuilder.setMessage(context
-				.getString(R.string.dialog_msg_no_resources));
-		return alertDialogBuilder;
-	}
-
-	private static AlertDialog.Builder createDownloadDialog(Context context,
-			SparseArray<OnClickListener> dialogHandlers, Event event,
-			AlertDialog.Builder alertDialogBuilder) {
-		alertDialogBuilder.setTitle(context
-				.getString(R.string.dialog_title_confirm_download));
-		alertDialogBuilder.setMessage(String.format(
-				context.getString(R.string.dialog_msg_confirm_download),
-				event.getId()));
-		alertDialogBuilder.setPositiveButton(
-				context.getString(R.string.dialog_btn_download),
-				dialogHandlers.get(DIALOG_POSITIVE_BUTTON_LISTENER));
-		alertDialogBuilder.setNegativeButton(
-				context.getString(R.string.dialog_btn_cancel),
-				dialogHandlers.get(DIALOG_NEGATIVE_BUTTON_LISTENER));
-		return alertDialogBuilder;
-	}
-
-	private static AlertDialog.Builder createOverwriteDialog(Context context,
-			SparseArray<OnClickListener> dialogHandlers, Event event,
-			AlertDialog.Builder alertDialogBuilder) {
-		alertDialogBuilder.setTitle(context
-				.getString(R.string.dialog_title_overwrite));
-		alertDialogBuilder.setMessage(String.format(
-				context.getString(R.string.dialog_msg_overwrite), event.getId()));
-		alertDialogBuilder.setPositiveButton(
-				context.getString(R.string.dialog_btn_overwrite),
-				dialogHandlers.get(DIALOG_POSITIVE_BUTTON_LISTENER));
-		alertDialogBuilder.setNegativeButton(
-				context.getString(R.string.dialog_btn_cancel),
-				dialogHandlers.get(DIALOG_NEGATIVE_BUTTON_LISTENER));
-		return alertDialogBuilder;
-	}
-
-	private static AlertDialog.Builder createReuseOrOverwriteDialog(
-			Context context, SparseArray<OnClickListener> dialogHandlers,
-			AlertDialog.Builder alertDialogBuilder) {
-		alertDialogBuilder.setTitle(context
-				.getString(R.string.dialog_title_reuse_or_overwrite));
-		alertDialogBuilder.setMessage(context
-				.getString(R.string.dialog_msg_reuse_or_overwrite));
-		alertDialogBuilder.setPositiveButton(
-				context.getString(R.string.dialog_btn_overwrite),
-				dialogHandlers.get(DIALOG_POSITIVE_BUTTON_LISTENER));
-		alertDialogBuilder.setNeutralButton(
-				context.getString(R.string.dialog_btn_reuse),
-				dialogHandlers.get(DIALOG_NEUTRAL_BUTTON_LISTENER));
-		alertDialogBuilder.setNegativeButton(
-				context.getString(R.string.dialog_btn_cancel),
-				dialogHandlers.get(DIALOG_NEGATIVE_BUTTON_LISTENER));
-		return alertDialogBuilder;
-	}
-
-	private static AlertDialog.Builder createOnlyReuseDialog(Context context,
-			SparseArray<OnClickListener> dialogHandlers,
-			AlertDialog.Builder alertDialogBuilder) {
-		alertDialogBuilder.setTitle(context
-				.getString(R.string.dialog_title_only_reuse));
-		alertDialogBuilder.setMessage(context
-				.getString(R.string.dialog_msg_only_reuse));
-		alertDialogBuilder.setPositiveButton(
-				context.getString(R.string.dialog_btn_reuse),
-				dialogHandlers.get(DIALOG_POSITIVE_BUTTON_LISTENER));
-		alertDialogBuilder.setNegativeButton(
-				context.getString(R.string.dialog_btn_cancel),
-				dialogHandlers.get(DIALOG_NEGATIVE_BUTTON_LISTENER));
-		return alertDialogBuilder;
-	}
-	
-	private static AlertDialog.Builder createError500Dialog(Context context,
-			Builder alertDialogBuilder) {
-		alertDialogBuilder.setTitle(context
-				.getString(R.string.dialog_title_error_500));
-		alertDialogBuilder.setMessage(context
-				.getString(R.string.dialog_msg_error_500));
-		return alertDialogBuilder;
-	}
-	private static AlertDialog.Builder createNotEnoughDiskSpaceDialog(Context context,
-			Builder alertDialogBuilder) {
-		alertDialogBuilder.setTitle(context
-				.getString(R.string.dialog_title_not_enough_disk_space));
-		alertDialogBuilder.setMessage(context
-				.getString(R.string.dialog_msg_not_enough_disk_space));
-		return null;
-	}
 }
