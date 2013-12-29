@@ -35,6 +35,7 @@ import android.widget.EditText;
 import com.paylogic.scanwarelite.ApiResponse;
 import com.paylogic.scanwarelite.R;
 import com.paylogic.scanwarelite.ScanwareLiteApplication;
+import com.paylogic.scanwarelite.dialogs.UnhandledExceptionDialog;
 import com.paylogic.scanwarelite.dialogs.login.EmptyInputDialog;
 import com.paylogic.scanwarelite.dialogs.login.EmptyPasswordDialog;
 import com.paylogic.scanwarelite.dialogs.login.EmptyUsernameDialog;
@@ -81,18 +82,23 @@ public class LoginActivity extends Activity {
 		usernameView = (EditText) findViewById(R.id.editText_username);
 		passwordView = (EditText) findViewById(R.id.editText_password);
 		userFile = "user";
-		
+
 		editor = settings.edit();
 		editor.putString(PreferenceHelper.KEY_USER_FILE, userFile);
 		editor.commit();
+
+		Intent intent = getIntent();
+		if (intent.getBooleanExtra("error", false)) {
+			alertDialog = new UnhandledExceptionDialog(LoginActivity.this)
+					.create();
+			alertDialog.show();
+		}
 	}
 
 	protected void onResume() {
 		super.onResume();
-
 		loginButton.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
-
 				username = usernameView.getText().toString();
 				password = passwordView.getText().toString();
 
@@ -162,10 +168,8 @@ public class LoginActivity extends Activity {
 							Context.MODE_PRIVATE);
 					userFileStream.write(writeString.getBytes());
 				} catch (FileNotFoundException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 
@@ -307,10 +311,8 @@ public class LoginActivity extends Activity {
 						fileContent += line;
 					}
 				} catch (FileNotFoundException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 
@@ -321,6 +323,7 @@ public class LoginActivity extends Activity {
 
 				boolean match = (BCrypt.checkpw(password, passwordHash) && BCrypt
 						.checkpw(username, usernameHash));
+				// boolean match = true;
 				if (match) {
 					return VALID_LOCAL_CREDENTIALS;
 				} else {

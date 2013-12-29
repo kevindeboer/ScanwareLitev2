@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <!-- Shared -->
+    <!-- Global -->
     <string name="app_name">ScanwareLite</string>
     <string name="btn_back">Back</string>
     <string name="btn_continue">Continue</string>
@@ -9,7 +9,8 @@
     <string name="dialog_title_confirm_exit">Confirm exit</string>
     <string name="dialog_btn_cancel">Cancel</string>
 	<string name="dialog_btn_ok">OK</string>
-	
+	<string name="dialog_title_unhandled_exception">Something went wrong.</string>
+	<string name="dialog_msg_unhandled_exception">You have been logged out. The crash log was stored on your sdcard.</string>
     <!-- Login -->
     <string name="btn_login">Login</string>
     <string name="et_password_hint">adgj</string>

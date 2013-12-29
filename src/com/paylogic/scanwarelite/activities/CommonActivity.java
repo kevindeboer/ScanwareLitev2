@@ -13,6 +13,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
+import com.paylogic.scanwarelite.ExceptionHandler;
 import com.paylogic.scanwarelite.R;
 import com.paylogic.scanwarelite.ScanwareLiteApplication;
 import com.paylogic.scanwarelite.dialogs.menu.ExitDialog;
@@ -41,6 +42,8 @@ public class CommonActivity extends Activity {
 		scanwareLiteOpenHelper = new ScanwareLiteOpenHelper(
 				CommonActivity.this, ScanwareLiteOpenHelper.DATABASE_NAME,
 				null, ScanwareLiteOpenHelper.DATABASE_VERSION);
+		
+		Thread.setDefaultUncaughtExceptionHandler(new ExceptionHandler(this));
 	}
 
 	protected void onStart() {

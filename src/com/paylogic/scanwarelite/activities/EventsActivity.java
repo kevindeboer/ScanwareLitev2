@@ -83,7 +83,6 @@ public class EventsActivity extends CommonActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_events);
-
 		settings = getSharedPreferences(PreferenceHelper.PREFS_FILE,
 				Context.MODE_PRIVATE);
 
