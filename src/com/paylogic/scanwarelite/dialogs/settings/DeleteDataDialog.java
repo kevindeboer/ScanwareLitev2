@@ -31,7 +31,7 @@ public class DeleteDataDialog extends AlertDialog.Builder {
 		setTitle(context.getString(R.string.dialog_title_delete_data));
 		setMessage(context.getString(R.string.dialog_msg_delete_data));
 
-		setPositiveButton(context.getString(R.string.dialog_btn_reuse),
+		setPositiveButton(context.getString(R.string.dialog_btn_ok),
 				new OnClickListener() {
 					public void onClick(DialogInterface dialog, int which) {
 						settingsActivity.deleteFile(userFile);

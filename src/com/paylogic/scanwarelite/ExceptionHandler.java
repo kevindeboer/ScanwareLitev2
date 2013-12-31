@@ -39,13 +39,8 @@ public class ExceptionHandler implements
 		exception.printStackTrace(new PrintWriter(stackTrace));
 		stackTraceString = stackTrace.toString();
 
-		Intent intent = new Intent(context, LoginActivity.class);
-		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-		intent.putExtra("error", true);
-		context.startActivity(intent);
-
 		now = new Date();
-		DateFormat df = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss");
+		DateFormat df = new SimpleDateFormat("dd-MM-yyyy_HH:mm:ss");
 		String nowString = df.format(now);
 		String fileName = "ScanwareLite_crash_" + nowString + ".log";
 		File logFile = new File(sdCard, fileName);
@@ -60,6 +55,11 @@ public class ExceptionHandler implements
 		} catch (IOException e) {
 
 		} finally {
+			Intent intent = new Intent(context, LoginActivity.class);
+			intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			intent.putExtra("error", true);
+			context.startActivity(intent);
+			
 			android.os.Process.killProcess(android.os.Process.myPid());
 			System.exit(10);
 		}

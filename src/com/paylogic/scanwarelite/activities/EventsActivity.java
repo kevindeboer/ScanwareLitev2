@@ -307,7 +307,7 @@ public class EventsActivity extends CommonActivity {
 			if (databaseExists || isConnected) {
 
 				// Get event from database
-				if (databaseExists()) {
+				if (databaseExists) {
 					getLocalEvent();
 				}
 
@@ -441,10 +441,6 @@ public class EventsActivity extends CommonActivity {
 			progressDialog.show();
 
 			deleteDatabase(ScanwareLiteOpenHelper.DATABASE_NAME);
-
-			scanwareLiteOpenHelper = new ScanwareLiteOpenHelper(
-					EventsActivity.this, ScanwareLiteOpenHelper.DATABASE_NAME,
-					null, ScanwareLiteOpenHelper.DATABASE_VERSION);
 		}
 
 		@Override
@@ -497,11 +493,7 @@ public class EventsActivity extends CommonActivity {
 
 				} else if (conn.getResponseCode() == HttpURLConnection.HTTP_INTERNAL_ERROR) {
 					publishProgress(HttpURLConnection.HTTP_INTERNAL_ERROR);
-					Thread.sleep(3000);
-
 				}
-			} catch (InterruptedException e) {
-				e.printStackTrace();
 			} catch (MalformedURLException e) {
 				e.printStackTrace();
 			} catch (IOException e) {
