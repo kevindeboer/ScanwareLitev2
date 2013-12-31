@@ -8,9 +8,9 @@
     <string name="dialog_msg_confirm_exit">Do you wish to exit the application?</string>
     <string name="dialog_title_confirm_exit">Confirm exit</string>
     <string name="dialog_btn_cancel">Cancel</string>
-	<string name="dialog_btn_ok">OK</string>
-	<string name="dialog_title_unhandled_exception">Something went wrong.</string>
-	<string name="dialog_msg_unhandled_exception">You have been logged out. The crash log was stored on your sdcard.</string>
+    <string name="dialog_btn_ok">OK</string>
+    <string name="dialog_title_unhandled_exception">Something went wrong.</string>
+    <string name="dialog_msg_unhandled_exception">You have been logged out. The crash log was stored on your sdcard.</string>
     <!-- Login -->
     <string name="btn_login">Login</string>
     <string name="et_password_hint">adgj</string>
@@ -86,13 +86,14 @@
     <string name="dialog_title_loading_camera">Loading camera</string>
     <string name="dialog_msg_loading_camera">Please wait&#8230;</string>
     <string name="dialog_msg_manual_input">Please input a barcode</string>
+    <string name="dialog_title_invalid_barcode_length">Invalid length</string>
+    <string name="dialog_msg_invalid_barcode_length">Please input a barcode of length 12 or 13</string>
 
     <!-- Settings -->
     <string name="tv_settings">Settings</string>
     <string name="btn_delete_all_data">Delete all data</string>
     <string name="dialog_title_delete_data">Warning</string>
     <string name="dialog_msg_delete_data">This will delete all event and user data. \n You will be logged out, and require internet connection to log in again.</string>
-    
 
     <!-- Menu -->
     <string name="menu_item_show_all_events">Show all events</string>

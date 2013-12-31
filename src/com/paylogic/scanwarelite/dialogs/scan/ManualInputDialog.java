@@ -16,12 +16,10 @@ public class ManualInputDialog extends AlertDialog.Builder {
 		
 		final ScanActivity scanActivity = (ScanActivity) context;
 		scanActivity.setRunning(false);
-		
-		AlertDialog.Builder alertDialogBuilder;
-		alertDialogBuilder = new AlertDialog.Builder(context);
-		alertDialogBuilder.setTitle(context
+
+		setTitle(context
 				.getString(R.string.dialog_title_manual_input));
-		alertDialogBuilder.setMessage(context
+		setMessage(context
 				.getString(R.string.dialog_msg_manual_input));
 
 		final EditText input = new EditText(context);
@@ -31,9 +29,9 @@ public class ManualInputDialog extends AlertDialog.Builder {
 		input.setFilters(filterArray);
 		input.setRawInputType(Configuration.KEYBOARD_QWERTY);
 		input.setSingleLine(true);
-		alertDialogBuilder.setView(input);
+		setView(input);
 		
-		alertDialogBuilder.setPositiveButton(context.getString(R.string.dialog_btn_ok),
+		setPositiveButton(context.getString(R.string.dialog_btn_ok),
 				new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int whichButton) {
 						String barcode = input.getText().toString();
@@ -43,7 +41,7 @@ public class ManualInputDialog extends AlertDialog.Builder {
 					}
 				});
 
-		alertDialogBuilder.setNegativeButton(context.getString(R.string.dialog_btn_cancel),
+		setNegativeButton(context.getString(R.string.dialog_btn_cancel),
 				new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int whichButton) {
 						scanActivity.setRunning(true);

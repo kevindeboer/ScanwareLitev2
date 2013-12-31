@@ -40,6 +40,7 @@ import com.paylogic.scanwarelite.dialogs.scan.BarcodeNotFoundDialog;
 import com.paylogic.scanwarelite.dialogs.scan.DisabledProductDialog;
 import com.paylogic.scanwarelite.dialogs.scan.InitCameraDialog;
 import com.paylogic.scanwarelite.dialogs.scan.InvalidBarcodeDialog;
+import com.paylogic.scanwarelite.dialogs.scan.InvalidBarcodeLengthDialog;
 import com.paylogic.scanwarelite.dialogs.scan.ManualInputDialog;
 import com.paylogic.scanwarelite.dialogs.scan.PaymentErrorDialog;
 import com.paylogic.scanwarelite.dialogs.scan.ValidProductDialog;
@@ -374,7 +375,8 @@ public class ScanActivity extends CommonActivity {
 			}
 
 		} else {
-			// invalid barcode length
+			alertDialog = new InvalidBarcodeLengthDialog(ScanActivity.this).create();
+			alertDialog.show();
 		}
 	}
 
