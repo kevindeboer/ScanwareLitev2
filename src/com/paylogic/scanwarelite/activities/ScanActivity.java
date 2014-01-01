@@ -80,27 +80,25 @@ public class ScanActivity extends CommonActivity {
 	private PreviewCallback previewCb = new PreviewCallback() {
 		public void onPreviewFrame(byte[] data, Camera camera) {
 
-			if (running) {
-				Camera.Parameters parameters = camera.getParameters();
-				Size size = parameters.getPreviewSize();
+			Camera.Parameters parameters = camera.getParameters();
+			Size size = parameters.getPreviewSize();
 
-				Image barcodeImage = new Image(size.width, size.height, "Y800");
-				barcodeImage.setData(data);
+			Image barcodeImage = new Image(size.width, size.height, "Y800");
+			barcodeImage.setData(data);
 
-				int result = scanner.scanImage(barcodeImage);
-				if (result != 0) {
-					mCamera.setPreviewCallback(null);
+			int result = scanner.scanImage(barcodeImage);
+			if (result != 0) {
+				stopScanning();
 
-					SymbolSet syms = scanner.getResults();
-					for (Symbol sym : syms) {
-						barcode = sym.getData();
-						// Im only interested in the first result, but there is
-						// no way to index SymbolSet
-						break;
-					}
-					processBarcode(barcode);
-
+				SymbolSet syms = scanner.getResults();
+				for (Symbol sym : syms) {
+					barcode = sym.getData();
+					// Im only interested in the first result, but there is
+					// no way to index SymbolSet
+					break;
 				}
+				processBarcode(barcode);
+
 			}
 		}
 	};
@@ -125,7 +123,6 @@ public class ScanActivity extends CommonActivity {
 	protected void onPause() {
 		super.onPause();
 		releaseCamera();
-
 		startScanningView.setVisibility(View.GONE);
 
 	}
@@ -178,6 +175,7 @@ public class ScanActivity extends CommonActivity {
 			break;
 
 		case R.id.menu_settings:
+			flashlightEnabled = false;
 			Intent intent = new Intent(ScanActivity.this,
 					SettingsActivity.class);
 			startActivity(intent);
@@ -224,11 +222,21 @@ public class ScanActivity extends CommonActivity {
 		}
 	}
 
-	public void dismissScanDialog() {
+	public void dismissDialog() {
 		alertDialog.dismiss();
+	}
+
+	public void startScanning() {
 		running = true;
-		invalidateOptionsMenu();
 		mCamera.setPreviewCallback(previewCb);
+		invalidateOptionsMenu();
+	}
+
+	public void stopScanning() {
+		running = false;
+		mCamera.setPreviewCallback(null);
+		mPreview.getHolder().removeCallback(mPreview);
+		invalidateOptionsMenu();
 	}
 
 	public void processBarcode(String barcode) {
@@ -375,7 +383,8 @@ public class ScanActivity extends CommonActivity {
 			}
 
 		} else {
-			alertDialog = new InvalidBarcodeLengthDialog(ScanActivity.this).create();
+			alertDialog = new InvalidBarcodeLengthDialog(ScanActivity.this)
+					.create();
 			alertDialog.show();
 		}
 	}
@@ -422,11 +431,6 @@ public class ScanActivity extends CommonActivity {
 		} else {
 			return false;
 		}
-	}
-
-	public void setRunning(boolean running) {
-		this.running = running;
-		invalidateOptionsMenu();
 	}
 
 	private class InitCameraTask extends AsyncTask<Void, Void, Void> {

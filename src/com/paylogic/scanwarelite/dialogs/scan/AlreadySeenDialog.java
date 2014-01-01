@@ -48,7 +48,8 @@ public class AlreadySeenDialog extends AlertDialog.Builder {
 		scanDialogView.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				scanActivity.dismissScanDialog();
+				scanActivity.dismissDialog();
+				scanActivity.startScanning();
 			}
 		});
 
