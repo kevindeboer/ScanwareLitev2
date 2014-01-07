@@ -23,7 +23,7 @@
         android:layout_centerHorizontal="true"
         android:layout_marginTop="41dp"
         android:choiceMode="singleChoice"
-        android:fadeScrollbars="false"/>
+        android:fadeScrollbars="false" />
 
     <Button
         android:id="@+id/button_event_continue"
@@ -44,5 +44,13 @@
         android:layout_marginBottom="23dp"
         android:layout_marginLeft="18dp"
         android:text="@string/btn_retry" />
+
+    <TextView
+        android:id="@+id/textView_local_event_hint"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/listView_events"
+        android:layout_below="@+id/listView_events"
+        android:hint="@string/tv_local_event_hint" />
 
 </RelativeLayout>

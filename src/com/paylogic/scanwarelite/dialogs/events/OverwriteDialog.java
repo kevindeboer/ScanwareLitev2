@@ -21,7 +21,7 @@ public class OverwriteDialog extends AlertDialog.Builder {
 		app = (ScanwareLiteApplication) eventsActivity.getApplication();
 		
 		setTitle(context.getString(R.string.dialog_title_overwrite));
-		setMessage(context.getString(R.string.dialog_msg_overwrite));
+		setMessage(String.format(context.getString(R.string.dialog_msg_overwrite), event.getName()));
 
 		setPositiveButton(context.getString(R.string.dialog_btn_overwrite),
 				new OnClickListener() {

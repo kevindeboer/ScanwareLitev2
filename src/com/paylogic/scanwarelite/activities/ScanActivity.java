@@ -478,8 +478,7 @@ public class ScanActivity extends CommonActivity {
 								Toast.makeText(ScanActivity.this,
 										"Starting to scan", Toast.LENGTH_LONG)
 										.show();
-								running = true;
-								invalidateOptionsMenu();
+								startScanning();
 								startScanningView.setVisibility(View.GONE);
 							}
 						}

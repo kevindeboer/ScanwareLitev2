@@ -4,12 +4,11 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
-import android.content.Intent;
 import android.content.SharedPreferences;
 
 import com.paylogic.scanwarelite.R;
 import com.paylogic.scanwarelite.ScanwareLiteApplication;
-import com.paylogic.scanwarelite.activities.LoginActivity;
+import com.paylogic.scanwarelite.activities.CommonActivity;
 import com.paylogic.scanwarelite.activities.SettingsActivity;
 import com.paylogic.scanwarelite.helpers.PreferenceHelper;
 import com.paylogic.scanwarelite.helpers.ScanwareLiteOpenHelper;
@@ -17,12 +16,15 @@ import com.paylogic.scanwarelite.helpers.ScanwareLiteOpenHelper;
 public class DeleteDataDialog extends AlertDialog.Builder {
 	private ScanwareLiteApplication app;
 	private SettingsActivity settingsActivity;
+	private CommonActivity commonActivity;
 	private SharedPreferences settings;
 	private String userFile;
 
 	public DeleteDataDialog(final Context context) {
 		super(context);
 		settingsActivity = (SettingsActivity) context;
+		commonActivity = (CommonActivity) context;
+		
 		app = (ScanwareLiteApplication) settingsActivity.getApplication();
 		settings = settingsActivity.getSharedPreferences(
 				PreferenceHelper.PREFS_FILE, Context.MODE_PRIVATE);
@@ -42,9 +44,7 @@ public class DeleteDataDialog extends AlertDialog.Builder {
 						app.setUsername(null);
 						app.setPassword(null);
 
-						Intent intent = new Intent(context, LoginActivity.class);
-						settingsActivity.startActivity(intent);
-						settingsActivity.finish();
+						commonActivity.logout();
 					}
 				});
 

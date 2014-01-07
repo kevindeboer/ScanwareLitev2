@@ -11,10 +11,11 @@
     <string name="dialog_btn_ok">OK</string>
     <string name="dialog_title_unhandled_exception">Something went wrong.</string>
     <string name="dialog_msg_unhandled_exception">You have been logged out. The crash log was stored on your sdcard.</string>
+    
     <!-- Login -->
     <string name="btn_login">Login</string>
-    <string name="et_password_hint">adgj</string>
-    <string name="et_username_hint">bramw</string>
+    <string name="et_password_hint">Password</string>
+    <string name="et_username_hint">Username</string>
     <string name="dialog_msg_attempting_login">Please wait&#8230;</string>
     <string name="dialog_msg_invalid_credentials">The given credentials did not match</string>
     <string name="dialog_msg_no_credentials">Please input your credentials</string>
@@ -57,9 +58,10 @@
     <string name="dialog_title_overwrite">Previous event data already exists</string>
     <string name="dialog_title_retrieving_event_data">Retrieving event data&#8230;</string>
     <string name="dialog_title_retrieving_events">Retrieving events</string>
-    <string name="dialog_title_reuse_or_overwrite">Barcodes for the selected event have already been downloaded.</string>
+    <string name="dialog_title_reuse_or_overwrite">Event data already downloaded</string>
     <string name="toast_select_event">Please select an event</string>
     <string name="tv_events_title">Select an event</string>
+    <string name="tv_local_event_hint">* = Previously downloaded event</string>
 
     <!-- Products -->
     <string name="tv_event_name">Event: %1$s</string>

@@ -23,6 +23,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteException;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -161,6 +162,7 @@ public class EventsActivity extends CommonActivity {
 				}
 			}
 		});
+
 	}
 
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -250,18 +252,17 @@ public class EventsActivity extends CommonActivity {
 			String eventName = event.getName();
 			String eventId = Integer.toString(event.getId());
 
+			TextView eventNameView = (TextView) v
+					.findViewById(R.id.textView_eventName);
+			TextView eventIdView = (TextView) v
+					.findViewById(R.id.textView_eventId);
+
 			if (selectedIndex != -1 && position == selectedIndex) {
 				v.setBackgroundColor(resources.getColor(R.color.selectedEvent));
-			} else if (event.getId() == existingEventId) {
-				v.setBackgroundColor(Color.LTGRAY);
 			} else {
 				v.setBackgroundColor(Color.TRANSPARENT);
 			}
 			if (event != null) {
-				TextView eventNameView = (TextView) v
-						.findViewById(R.id.textView_eventName);
-				TextView eventIdView = (TextView) v
-						.findViewById(R.id.textView_eventId);
 
 				eventNameView.setText(eventName);
 				eventIdView.setText("(" + eventId + ")");
@@ -308,7 +309,11 @@ public class EventsActivity extends CommonActivity {
 
 				// Get event from database
 				if (databaseExists) {
-					getLocalEvent();
+					try {
+						getLocalEvent();
+					} catch (SQLiteException e) {
+
+					}
 				}
 
 				// Get events from API
@@ -410,7 +415,7 @@ public class EventsActivity extends CommonActivity {
 							.getString(cursor
 									.getColumnIndex(ScanwareLiteOpenHelper.EVENT_KEY_TITLE));
 					Event existingEvent = new Event(existingEventId,
-							existingEventTitle, null, null);
+							existingEventTitle + "*", null, null);
 					publishProgress(existingEvent);
 				}
 			}
@@ -455,7 +460,8 @@ public class EventsActivity extends CommonActivity {
 					alertDialog = new Error500Dialog(EventsActivity.this)
 							.create();
 				} else if (errorCode == NOT_ENOUGH_DISK_SPACE) {
-					alertDialog = new InsufficientStorageDialog(EventsActivity.this).create();
+					alertDialog = new InsufficientStorageDialog(
+							EventsActivity.this).create();
 					alertDialog.show();
 				}
 			}

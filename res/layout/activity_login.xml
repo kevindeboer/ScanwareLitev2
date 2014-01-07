@@ -34,7 +34,7 @@
         android:layout_centerHorizontal="true"
         android:layout_marginTop="41dp"
         android:ems="10"
-        android:text="@string/et_username_hint"
+        android:hint="@string/et_username_hint"
         android:singleLine="true" >
 
         <requestFocus />
@@ -48,7 +48,7 @@
         android:layout_centerHorizontal="true"
         android:layout_marginTop="20dp"
         android:ems="10"
-        android:text="@string/et_password_hint"
+        android:hint="@string/et_password_hint"
         android:inputType="textPassword"
         android:singleLine="true" />
 

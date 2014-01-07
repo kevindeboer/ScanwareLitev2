@@ -202,7 +202,7 @@ public class LoginActivity extends Activity {
 
 				conn = (HttpURLConnection) url.openConnection();
 				conn.setRequestMethod("GET");
-
+				// TODO no responses
 				parseResponse(conn);
 
 			} catch (MalformedURLException e) {
@@ -323,7 +323,7 @@ public class LoginActivity extends Activity {
 
 				boolean match = (BCrypt.checkpw(password, passwordHash) && BCrypt
 						.checkpw(username, usernameHash));
-				// boolean match = true;
+//				 boolean match = true;
 				if (match) {
 					return VALID_LOCAL_CREDENTIALS;
 				} else {
