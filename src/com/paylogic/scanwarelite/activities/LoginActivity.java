@@ -246,6 +246,7 @@ public class LoginActivity extends Activity {
 						response = ApiResponse.OK;
 					}
 				}
+				
 			} catch (IOException e) {
 				e.printStackTrace();
 			} catch (ParserConfigurationException e) {
