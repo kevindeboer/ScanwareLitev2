@@ -170,7 +170,7 @@ public class ScanActivity extends CommonActivity {
 		super.onOptionsItemSelected(item);
 		switch (item.getItemId()) {
 		case R.id.menu_manual_input:
-			alertDialog = new ManualInputDialog(ScanActivity.this).create();
+			alertDialog = new ManualInputDialog(ScanActivity.this);
 			alertDialog.show();
 			break;
 
@@ -196,8 +196,7 @@ public class ScanActivity extends CommonActivity {
 			break;
 
 		case R.id.menu_pause_scanning:
-			running = false;
-			invalidateOptionsMenu();
+			stopScanning();
 			startScanningView.setVisibility(View.VISIBLE);
 			break;
 		}
@@ -243,7 +242,7 @@ public class ScanActivity extends CommonActivity {
 		if (barcode.length() == 13) {
 			if (!validChecksum(barcode)) {
 				alertDialog = new InvalidBarcodeDialog(ScanActivity.this,
-						barcode).create();
+						barcode);
 				alertDialog.show();
 
 				mediaPlayer = MediaPlayer.create(ScanActivity.this,
@@ -281,7 +280,7 @@ public class ScanActivity extends CommonActivity {
 			if (cursor.getCount() == 0) {
 				// barcode not found error
 				alertDialog = new BarcodeNotFoundDialog(ScanActivity.this,
-						barcode).create();
+						barcode);
 				alertDialog.show();
 
 				mediaPlayer = MediaPlayer.create(ScanActivity.this,
@@ -300,7 +299,7 @@ public class ScanActivity extends CommonActivity {
 					if (payCode.getCode() == payStatus) {
 						// payment error
 						alertDialog = new PaymentErrorDialog(ScanActivity.this,
-								barcode).create();
+								barcode);
 						alertDialog.show();
 
 						mediaPlayer = MediaPlayer.create(ScanActivity.this,
@@ -320,7 +319,7 @@ public class ScanActivity extends CommonActivity {
 									.getColumnIndex(ScanwareLiteOpenHelper.BARCODES_KEY_SEENDATE));
 
 					alertDialog = new AlreadySeenDialog(ScanActivity.this,
-							barcode, seenDate).create();
+							barcode, seenDate);
 					alertDialog.show();
 
 					mediaPlayer = MediaPlayer.create(ScanActivity.this,
@@ -340,7 +339,7 @@ public class ScanActivity extends CommonActivity {
 					// filtered product error
 
 					alertDialog = new DisabledProductDialog(ScanActivity.this,
-							barcode, product).create();
+							barcode, product);
 					alertDialog.show();
 
 					mediaPlayer = MediaPlayer.create(ScanActivity.this,
@@ -354,7 +353,7 @@ public class ScanActivity extends CommonActivity {
 									.getColumnIndex(ScanwareLiteOpenHelper.BARCODES_KEY_NAME));
 
 					alertDialog = new ValidProductDialog(ScanActivity.this,
-							barcode, product, name).create();
+							barcode, product, name);
 					alertDialog.show();
 
 					mediaPlayer = MediaPlayer.create(ScanActivity.this,
@@ -383,8 +382,7 @@ public class ScanActivity extends CommonActivity {
 			}
 
 		} else {
-			alertDialog = new InvalidBarcodeLengthDialog(ScanActivity.this)
-					.create();
+			alertDialog = new InvalidBarcodeLengthDialog(ScanActivity.this);
 			alertDialog.show();
 		}
 	}
@@ -437,8 +435,8 @@ public class ScanActivity extends CommonActivity {
 
 		@Override
 		protected void onPreExecute() {
-			alertDialog = new InitCameraDialog(ScanActivity.this).create();
-			alertDialog.show();
+			progressDialog = new InitCameraDialog(ScanActivity.this);
+			progressDialog.show();
 			setContentView(R.layout.activity_scan);
 			startScanningView = (TextView) findViewById(R.id.textView_start_scanning);
 		}
@@ -450,7 +448,7 @@ public class ScanActivity extends CommonActivity {
 
 			autoFocusHandler = new Handler();
 
-			alertDialog.dismiss();
+			progressDialog.dismiss();
 		}
 
 		@Override
@@ -464,7 +462,7 @@ public class ScanActivity extends CommonActivity {
 				public void run() {
 					FrameLayout preview = (FrameLayout) findViewById(R.id.camera_preview);
 					mPreview = new CameraPreview(ScanActivity.this, mCamera,
-							previewCb, autoFocusCB);
+							null, autoFocusCB);
 					preview.addView(mPreview);
 					mCamera.startPreview();
 					if (!running) {

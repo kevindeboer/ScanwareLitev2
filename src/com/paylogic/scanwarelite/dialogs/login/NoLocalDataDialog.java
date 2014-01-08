@@ -1,11 +1,11 @@
 package com.paylogic.scanwarelite.dialogs.login;
 
-import android.app.AlertDialog;
 import android.content.Context;
 
 import com.paylogic.scanwarelite.R;
+import com.paylogic.scanwarelite.dialogs.CommonAlertDialog;
 
-public class NoLocalDataDialog extends AlertDialog.Builder {
+public class NoLocalDataDialog extends CommonAlertDialog {
 
 	public NoLocalDataDialog(Context context) {
 		super(context);

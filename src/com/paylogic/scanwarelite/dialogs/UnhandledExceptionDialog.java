@@ -1,11 +1,10 @@
 package com.paylogic.scanwarelite.dialogs;
 
-import android.app.AlertDialog;
 import android.content.Context;
 
 import com.paylogic.scanwarelite.R;
 
-public class UnhandledExceptionDialog extends AlertDialog.Builder {
+public class UnhandledExceptionDialog extends CommonAlertDialog {
 	
 	public UnhandledExceptionDialog(Context context) {
 		super(context);

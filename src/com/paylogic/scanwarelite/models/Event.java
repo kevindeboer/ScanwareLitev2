@@ -61,4 +61,8 @@ public class Event {
 		return endDate;
 	}
 	
+	public void setName(String name){
+		this.name = name;
+	}
+	
 }

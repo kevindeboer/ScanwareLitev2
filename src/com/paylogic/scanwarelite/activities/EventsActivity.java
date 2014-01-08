@@ -100,7 +100,7 @@ public class EventsActivity extends CommonActivity {
 		events_adapter = new EventsAdapter(EventsActivity.this,
 				android.R.layout.simple_list_item_1, events);
 		eventsView.setAdapter(events_adapter);
-
+		
 		updateEvents();
 	}
 
@@ -137,22 +137,22 @@ public class EventsActivity extends CommonActivity {
 						if (!ConnectivityHelper
 								.isConnected(EventsActivity.this)) {
 							alertDialog = new OnlyReuseDialog(
-									EventsActivity.this).create();
+									EventsActivity.this);
 							alertDialog.show();
 						} else {
 							alertDialog = new ReuseOrOverwriteDialog(
-									EventsActivity.this, selectedEvent)
-									.create();
+									EventsActivity.this, selectedEvent);
+									
 							alertDialog.show();
 
 						}
 					} else if (databaseExists()) {
 						alertDialog = new OverwriteDialog(EventsActivity.this,
-								selectedEvent).create();
+								selectedEvent);
 						alertDialog.show();
 					} else {
 						alertDialog = new DownloadDialog(EventsActivity.this,
-								selectedEvent).create();
+								selectedEvent);
 						alertDialog.show();
 					}
 				} else {
@@ -322,8 +322,7 @@ public class EventsActivity extends CommonActivity {
 				}
 
 			} else {
-				alertDialog = new NoResourcesDialog(EventsActivity.this)
-						.create();
+				alertDialog = new NoResourcesDialog(EventsActivity.this);
 				alertDialog.show();
 			}
 
@@ -422,7 +421,7 @@ public class EventsActivity extends CommonActivity {
 		}
 	}
 
-	public class DownloadSpqTask extends AsyncTask<Event, Integer, Void> {
+	public class DownloadSpqTask extends AsyncTask<Void, Integer, Void> {
 		private String url = "https://api.paylogic.nl/API/?command=";
 		private String fileName = "event.spq";
 
@@ -457,19 +456,19 @@ public class EventsActivity extends CommonActivity {
 				startActivity(intent);
 			} else {
 				if (errorCode == HttpURLConnection.HTTP_INTERNAL_ERROR) {
-					alertDialog = new Error500Dialog(EventsActivity.this)
-							.create();
+					alertDialog = new Error500Dialog(EventsActivity.this);
+
 					alertDialog.show();
 				} else if (errorCode == NOT_ENOUGH_DISK_SPACE) {
 					alertDialog = new InsufficientStorageDialog(
-							EventsActivity.this).create();
+							EventsActivity.this);
 					alertDialog.show();
 				}
 			}
 		}
 
 		@Override
-		protected Void doInBackground(Event... events) {
+		protected Void doInBackground(Void... args) {
 
 			PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
 			PowerManager.WakeLock wl = pm.newWakeLock(

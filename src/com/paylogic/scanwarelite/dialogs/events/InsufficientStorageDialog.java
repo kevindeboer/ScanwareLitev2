@@ -1,11 +1,11 @@
 package com.paylogic.scanwarelite.dialogs.events;
 
-import android.app.AlertDialog;
 import android.content.Context;
 
 import com.paylogic.scanwarelite.R;
+import com.paylogic.scanwarelite.dialogs.CommonAlertDialog;
 
-public class InsufficientStorageDialog extends AlertDialog.Builder {
+public class InsufficientStorageDialog extends CommonAlertDialog {
 
 	public InsufficientStorageDialog(final Context context) {
 		super(context);

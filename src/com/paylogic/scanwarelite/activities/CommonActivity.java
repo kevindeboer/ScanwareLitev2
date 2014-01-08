@@ -89,13 +89,17 @@ public class CommonActivity extends Activity {
             break;
 
         case R.id.menu_exit:
-            alertDialog = new ExitDialog(CommonActivity.this).create();
+            alertDialog = new ExitDialog(CommonActivity.this);
             alertDialog.show();
             break;
         }
         return true;
     }
-
+    
+    public void dismissDialog(){
+    	alertDialog.dismiss();
+    }
+    
     public void logout() {
         Intent intent = new Intent(CommonActivity.this, LoginActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);

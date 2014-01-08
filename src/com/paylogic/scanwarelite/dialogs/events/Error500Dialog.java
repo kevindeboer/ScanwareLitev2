@@ -5,7 +5,7 @@ import android.content.Context;
 
 import com.paylogic.scanwarelite.R;
 
-public class Error500Dialog extends AlertDialog.Builder {
+public class Error500Dialog extends AlertDialog {
 
 	public Error500Dialog(final Context context) {
 		super(context);

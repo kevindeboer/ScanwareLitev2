@@ -1,19 +1,18 @@
 package com.paylogic.scanwarelite.dialogs.settings;
 
-import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.DialogInterface.OnClickListener;
 import android.content.SharedPreferences;
 
 import com.paylogic.scanwarelite.R;
 import com.paylogic.scanwarelite.ScanwareLiteApplication;
 import com.paylogic.scanwarelite.activities.CommonActivity;
 import com.paylogic.scanwarelite.activities.SettingsActivity;
+import com.paylogic.scanwarelite.dialogs.CommonAlertDialog;
 import com.paylogic.scanwarelite.helpers.PreferenceHelper;
 import com.paylogic.scanwarelite.helpers.ScanwareLiteOpenHelper;
 
-public class DeleteDataDialog extends AlertDialog.Builder {
+public class DeleteDataDialog extends CommonAlertDialog {
 	private ScanwareLiteApplication app;
 	private SettingsActivity settingsActivity;
 	private CommonActivity commonActivity;
@@ -32,27 +31,26 @@ public class DeleteDataDialog extends AlertDialog.Builder {
 
 		setTitle(context.getString(R.string.dialog_title_delete_data));
 		setMessage(context.getString(R.string.dialog_msg_delete_data));
+		
+		setButton(BUTTON_POSITIVE, context.getString(R.string.dialog_btn_ok), new OnClickListener() {
+			public void onClick(DialogInterface dialog, int id) {
+				settingsActivity.deleteFile(userFile);
+				settingsActivity
+						.deleteDatabase(ScanwareLiteOpenHelper.DATABASE_NAME);
 
-		setPositiveButton(context.getString(R.string.dialog_btn_ok),
-				new OnClickListener() {
-					public void onClick(DialogInterface dialog, int which) {
-						settingsActivity.deleteFile(userFile);
-						settingsActivity
-								.deleteDatabase(ScanwareLiteOpenHelper.DATABASE_NAME);
+				app.setUserId(-1);
+				app.setUsername(null);
+				app.setPassword(null);
 
-						app.setUserId(-1);
-						app.setUsername(null);
-						app.setPassword(null);
-
-						commonActivity.logout();
-					}
-				});
-
-		setNegativeButton(context.getString(R.string.dialog_btn_cancel),
-				new OnClickListener() {
-					public void onClick(DialogInterface dialog, int id) {
-						settingsActivity.dismissDialog();
-					}
-				});
+				commonActivity.logout();
+			}
+		});
+		
+		setButton(BUTTON_NEGATIVE, context.getString(R.string.dialog_btn_cancel), new OnClickListener() {
+			public void onClick(DialogInterface dialog, int id) {
+				dialog.cancel();
+			}
+		});
+		
 	}
 }

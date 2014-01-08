@@ -89,8 +89,7 @@ public class LoginActivity extends Activity {
 
 		Intent intent = getIntent();
 		if (intent.getBooleanExtra("error", false)) {
-			alertDialog = new UnhandledExceptionDialog(LoginActivity.this)
-					.create();
+			alertDialog = new UnhandledExceptionDialog(LoginActivity.this);
 			alertDialog.show();
 		}
 	}
@@ -104,24 +103,21 @@ public class LoginActivity extends Activity {
 
 				// if both inputs are empty
 				if (username.length() == 0 && password.length() == 0) {
-					alertDialog = new EmptyInputDialog(LoginActivity.this)
-							.create();
+					alertDialog = new EmptyInputDialog(LoginActivity.this);
 					alertDialog.show();
 					return;
 				}
 
 				// if password is empty
 				if (password.length() == 0) {
-					alertDialog = new EmptyPasswordDialog(LoginActivity.this)
-							.create();
+					alertDialog = new EmptyPasswordDialog(LoginActivity.this);
 					alertDialog.show();
 					return;
 				}
 
 				// if username is empty
 				if (username.length() == 0) {
-					alertDialog = new EmptyUsernameDialog(LoginActivity.this)
-							.create();
+					alertDialog = new EmptyUsernameDialog(LoginActivity.this);
 					alertDialog.show();
 					return;
 				}
@@ -183,8 +179,7 @@ public class LoginActivity extends Activity {
 
 				startActivity(intent);
 			} else if (response == ApiResponse.INVALID_LOGIN) {
-				alertDialog = new InvalidCredentialsDialog(LoginActivity.this)
-						.create();
+				alertDialog = new InvalidCredentialsDialog(LoginActivity.this);
 				alertDialog.show();
 			}
 		}
@@ -246,7 +241,7 @@ public class LoginActivity extends Activity {
 						response = ApiResponse.OK;
 					}
 				}
-				
+
 			} catch (IOException e) {
 				e.printStackTrace();
 			} catch (ParserConfigurationException e) {
@@ -286,13 +281,11 @@ public class LoginActivity extends Activity {
 				startActivity(intent);
 
 			} else if (result == INVALID_LOCAL_CREDENTIALS) {
-				alertDialog = new InvalidCredentialsDialog(LoginActivity.this)
-						.create();
+				alertDialog = new InvalidCredentialsDialog(LoginActivity.this);
 				alertDialog.show();
 
 			} else if (result == NO_LOCAL_DATA) {
-				alertDialog = new NoLocalDataDialog(LoginActivity.this)
-						.create();
+				alertDialog = new NoLocalDataDialog(LoginActivity.this);
 				alertDialog.show();
 			}
 		}

@@ -1,11 +1,11 @@
 package com.paylogic.scanwarelite.dialogs.events;
 
-import android.app.AlertDialog;
 import android.content.Context;
 
 import com.paylogic.scanwarelite.R;
+import com.paylogic.scanwarelite.dialogs.CommonAlertDialog;
 
-public class NoResourcesDialog extends AlertDialog.Builder {
+public class NoResourcesDialog extends CommonAlertDialog {
 
 	public NoResourcesDialog(final Context context) {
 		super(context);

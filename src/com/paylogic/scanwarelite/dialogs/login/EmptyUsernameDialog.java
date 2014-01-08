@@ -1,11 +1,11 @@
 package com.paylogic.scanwarelite.dialogs.login;
 
-import android.app.AlertDialog;
 import android.content.Context;
 
 import com.paylogic.scanwarelite.R;
+import com.paylogic.scanwarelite.dialogs.CommonAlertDialog;
 
-public class EmptyUsernameDialog extends AlertDialog.Builder {
+public class EmptyUsernameDialog extends CommonAlertDialog {
 
 	public EmptyUsernameDialog(Context context) {
 		super(context);

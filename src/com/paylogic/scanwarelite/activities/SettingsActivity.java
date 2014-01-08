@@ -26,14 +26,10 @@ public class SettingsActivity extends CommonActivity {
 			@Override
 			public void onClick(View v) {
 		
-				alertDialog = new DeleteDataDialog(SettingsActivity.this).create();
+				alertDialog = new DeleteDataDialog(SettingsActivity.this);
 				alertDialog.show();
 			}
 		});
-	}
-	
-	public void dismissDialog(){
-		alertDialog.cancel();
 	}
 	
 	@Override
