@@ -459,6 +459,7 @@ public class EventsActivity extends CommonActivity {
 				if (errorCode == HttpURLConnection.HTTP_INTERNAL_ERROR) {
 					alertDialog = new Error500Dialog(EventsActivity.this)
 							.create();
+					alertDialog.show();
 				} else if (errorCode == NOT_ENOUGH_DISK_SPACE) {
 					alertDialog = new InsufficientStorageDialog(
 							EventsActivity.this).create();

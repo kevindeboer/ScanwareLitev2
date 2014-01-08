@@ -21,8 +21,8 @@ public class DownloadDialog extends AlertDialog.Builder {
 		app = (ScanwareLiteApplication) eventsActivity.getApplication();
 		
 		setTitle(context.getString(R.string.dialog_title_confirm_download));
-		setMessage(context.getString(R.string.dialog_msg_confirm_download));
-
+		setMessage(String.format(context.getString(R.string.dialog_msg_confirm_download), event.getName()));
+		
 		setPositiveButton(context.getString(R.string.dialog_btn_download),
 				new OnClickListener() {
 					public void onClick(DialogInterface dialog, int which) {
