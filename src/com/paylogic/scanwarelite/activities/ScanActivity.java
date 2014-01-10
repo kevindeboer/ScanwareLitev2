@@ -61,7 +61,7 @@ public class ScanActivity extends CommonActivity {
 	private boolean hasFlashlight;
 	private boolean flashlightEnabled;
 	private String barcode;
-	private boolean running = false;
+	private boolean scanning = false;
 	private Handler autoFocusHandler;
 	private Runnable doAutoFocus = new Runnable() {
 		public void run() {
@@ -79,26 +79,27 @@ public class ScanActivity extends CommonActivity {
 
 	private PreviewCallback previewCb = new PreviewCallback() {
 		public void onPreviewFrame(byte[] data, Camera camera) {
+			if (scanning) {
+				Camera.Parameters parameters = camera.getParameters();
+				Size size = parameters.getPreviewSize();
 
-			Camera.Parameters parameters = camera.getParameters();
-			Size size = parameters.getPreviewSize();
+				Image barcodeImage = new Image(size.width, size.height, "Y800");
+				barcodeImage.setData(data);
 
-			Image barcodeImage = new Image(size.width, size.height, "Y800");
-			barcodeImage.setData(data);
+				int result = scanner.scanImage(barcodeImage);
+				if (result != 0) {
+					stopScanning();
 
-			int result = scanner.scanImage(barcodeImage);
-			if (result != 0) {
-				stopScanning();
+					SymbolSet syms = scanner.getResults();
+					for (Symbol sym : syms) {
+						barcode = sym.getData();
+						// Im only interested in the first result, but there is
+						// no way to index SymbolSet
+						break;
+					}
+					processBarcode(barcode);
 
-				SymbolSet syms = scanner.getResults();
-				for (Symbol sym : syms) {
-					barcode = sym.getData();
-					// Im only interested in the first result, but there is
-					// no way to index SymbolSet
-					break;
 				}
-				processBarcode(barcode);
-
 			}
 		}
 	};
@@ -154,7 +155,7 @@ public class ScanActivity extends CommonActivity {
 			menu.removeItem(R.id.menu_flashlight);
 		}
 
-		if (!running) {
+		if (!scanning) {
 			pauseScanningMenuItem.setVisible(false);
 			manualInputMenuitem.setVisible(false);
 
@@ -226,15 +227,15 @@ public class ScanActivity extends CommonActivity {
 	}
 
 	public void startScanning() {
-		running = true;
-		mCamera.setPreviewCallback(previewCb);
+		scanning = true;
+//		mCamera.setPreviewCallback(previewCb);
 		invalidateOptionsMenu();
 	}
 
 	public void stopScanning() {
-		running = false;
-		mCamera.setPreviewCallback(null);
-		mPreview.getHolder().removeCallback(mPreview);
+		scanning = false;
+//		mCamera.setPreviewCallback(null);
+//		mPreview.getHolder().removeCallback(mPreview);
 		invalidateOptionsMenu();
 	}
 
@@ -462,17 +463,18 @@ public class ScanActivity extends CommonActivity {
 				public void run() {
 					FrameLayout preview = (FrameLayout) findViewById(R.id.camera_preview);
 					mPreview = new CameraPreview(ScanActivity.this, mCamera,
-							null, autoFocusCB);
+							previewCb, autoFocusCB);
+
 					preview.addView(mPreview);
 					mCamera.startPreview();
-					if (!running) {
+					if (!scanning) {
 						startScanningView.setVisibility(View.VISIBLE);
 					}
 					mPreview.setOnClickListener(new OnClickListener() {
 
 						@Override
 						public void onClick(View v) {
-							if (!running) {
+							if (!scanning) {
 								Toast.makeText(ScanActivity.this,
 										"Starting to scan", Toast.LENGTH_LONG)
 										.show();

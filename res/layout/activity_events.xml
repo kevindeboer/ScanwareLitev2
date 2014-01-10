@@ -18,12 +18,21 @@
 
     <ListView
         android:id="@+id/listView_events"
-        android:layout_width="250dp"
-        android:layout_height="250dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/textView_local_event_hint"
+        android:layout_below="@+id/textView_events_title"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="41dp"
         android:choiceMode="singleChoice"
         android:fadeScrollbars="false" />
+
+    <TextView
+        android:id="@+id/textView_local_event_hint"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/button_event_continue"
+        android:layout_alignLeft="@+id/listView_events"
+        android:hint="@string/tv_local_event_hint" />
 
     <Button
         android:id="@+id/button_event_continue"
@@ -31,8 +40,8 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
-        android:layout_marginBottom="23dp"
-        android:layout_marginRight="18dp"
+        android:layout_marginBottom="5dp"
+        android:layout_marginRight="1dp"
         android:text="@string/btn_continue" />
 
     <Button
@@ -41,16 +50,8 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
-        android:layout_marginBottom="23dp"
-        android:layout_marginLeft="18dp"
+        android:layout_marginBottom="5dp"
+        android:layout_marginLeft="1dp"
         android:text="@string/btn_refresh" />
-
-    <TextView
-        android:id="@+id/textView_local_event_hint"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/listView_events"
-        android:layout_below="@+id/listView_events"
-        android:hint="@string/tv_local_event_hint" />
 
 </RelativeLayout>

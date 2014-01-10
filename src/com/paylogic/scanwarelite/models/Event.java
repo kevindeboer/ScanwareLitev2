@@ -12,8 +12,6 @@ public class Event {
 	private Date endDate;
 	private Date deadline;
 	
-
-
 	public Event(int id, String name, String endDate, String deadline) {
 		this.id = id;
 		this.name = name;
