@@ -1,8 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
+    
+    <string name="app_name">Scanware</string>
+    
+    <!-- Keep this in sync with manifest -->
+    <string name="version">Version: 1402</string>
+    
     <!-- Global -->
-    <string name="app_name">ScanwareLite</string>
     <string name="btn_back">Back</string>
     <string name="btn_continue">Continue</string>
     <string name="dialog_msg_confirm_exit">Do you wish to exit the application?</string>
@@ -36,7 +40,7 @@
     <string name="dialog_btn_exit">Exit</string>
     <string name="dialog_btn_download">Download</string>
     <string name="dialog_btn_overwrite">Overwrite</string>
-    <string name="btn_retry">Retry</string>
+    <string name="btn_refresh">Refresh</string>
     <string name="dialog_btn_reuse">Re-use</string>
     <string name="cb_show_all">Show all</string>
     <string name="dialog_msg_confirm_download">Download data for event: %1$s?</string>

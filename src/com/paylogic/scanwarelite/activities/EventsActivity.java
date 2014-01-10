@@ -100,7 +100,7 @@ public class EventsActivity extends CommonActivity {
 		events_adapter = new EventsAdapter(EventsActivity.this,
 				android.R.layout.simple_list_item_1, events);
 		eventsView.setAdapter(events_adapter);
-		
+
 		updateEvents();
 	}
 
@@ -142,7 +142,7 @@ public class EventsActivity extends CommonActivity {
 						} else {
 							alertDialog = new ReuseOrOverwriteDialog(
 									EventsActivity.this, selectedEvent);
-									
+
 							alertDialog.show();
 
 						}
@@ -285,6 +285,9 @@ public class EventsActivity extends CommonActivity {
 	private class GetEventsTask extends AsyncTask<Void, Event, Void> {
 		private HttpURLConnection conn;
 		private String url = "https://api.paylogic.nl/API/?command=";
+		boolean databaseExists;
+		boolean isConnected;
+		boolean noResources;
 
 		@Override
 		protected void onPreExecute() {
@@ -293,18 +296,23 @@ public class EventsActivity extends CommonActivity {
 
 			events.clear();
 			events_adapter.notifyDataSetChanged();
+
+			databaseExists = databaseExists();
+			isConnected = ConnectivityHelper.isConnected(EventsActivity.this);
 		}
 
 		@Override
 		protected void onPostExecute(Void result) {
 			progressDialog.dismiss();
+			
+			if (noResources) {
+				alertDialog = new NoResourcesDialog(EventsActivity.this);
+				alertDialog.show();
+			}
 		}
 
 		@Override
 		protected Void doInBackground(Void... params) {
-			boolean databaseExists = databaseExists();
-			boolean isConnected = ConnectivityHelper
-					.isConnected(EventsActivity.this);
 			if (databaseExists || isConnected) {
 
 				// Get event from database
@@ -322,8 +330,7 @@ public class EventsActivity extends CommonActivity {
 				}
 
 			} else {
-				alertDialog = new NoResourcesDialog(EventsActivity.this);
-				alertDialog.show();
+				noResources = true;
 			}
 
 			return null;

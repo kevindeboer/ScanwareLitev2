@@ -71,4 +71,13 @@
         android:src="@drawable/logo" 
         android:contentDescription="@string/iv_paylogic_logo"/>
 
+    <TextView
+        android:id="@+id/textView_version"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:hint="@string/version"
+        android:textAppearance="?android:attr/textAppearanceSmall" />
+
 </RelativeLayout>
