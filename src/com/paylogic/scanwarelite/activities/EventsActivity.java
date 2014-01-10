@@ -6,6 +6,8 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -75,8 +77,7 @@ public class EventsActivity extends CommonActivity {
 	private String username;
 	private String password;
 	private int userId;
-	private int existingEventId;
-
+	private Event existingEvent;
 	private SharedPreferences settings;
 	private SharedPreferences.Editor editor;
 
@@ -116,7 +117,7 @@ public class EventsActivity extends CommonActivity {
 				// Disable continue button for all events but the local event if
 				// internet connectivity is lost
 				if (!ConnectivityHelper.isConnected(EventsActivity.this)
-						&& !(selectedEvent.getId() == existingEventId)) {
+						&& !(selectedEvent.getId() == existingEvent.getId())) {
 					continueButton.setClickable(false);
 				} else {
 					continueButton.setClickable(true);
@@ -133,7 +134,7 @@ public class EventsActivity extends CommonActivity {
 		continueButton.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
 				if (selectedEvent != null) {
-					if (selectedEvent.getId() == existingEventId) {
+					if (selectedEvent.getId() == existingEvent.getId()) {
 						if (!ConnectivityHelper
 								.isConnected(EventsActivity.this)) {
 							alertDialog = new OnlyReuseDialog(
@@ -250,12 +251,15 @@ public class EventsActivity extends CommonActivity {
 			Event event = events.get(position);
 
 			String eventName = event.getName();
-			String eventId = Integer.toString(event.getId());
+			
+			DateFormat df = new SimpleDateFormat("dd-MM-yyyy");
+			Date eventEndDate = event.getEndDate();
+			String dateString = df.format(eventEndDate);
 
 			TextView eventNameView = (TextView) v
 					.findViewById(R.id.textView_eventName);
-			TextView eventIdView = (TextView) v
-					.findViewById(R.id.textView_eventId);
+			TextView eventDateView = (TextView) v
+					.findViewById(R.id.textView_eventDate);
 
 			if (selectedIndex != -1 && position == selectedIndex) {
 				v.setBackgroundColor(resources.getColor(R.color.selectedEvent));
@@ -265,17 +269,17 @@ public class EventsActivity extends CommonActivity {
 			if (event != null) {
 
 				eventNameView.setText(eventName);
-				eventIdView.setText("(" + eventId + ")");
+				eventDateView.setText("(" + dateString + ")");
 
 				params = new LayoutParams(
-						(int) (parent.getMeasuredWidth() * 0.8),
+						(int) (parent.getMeasuredWidth() * 0.7),
 						LayoutParams.WRAP_CONTENT);
 				eventNameView.setLayoutParams(params);
 
 				params = new LayoutParams(
-						(int) (parent.getMeasuredWidth() * 0.2),
+						(int) (parent.getMeasuredWidth() * 0.3),
 						LayoutParams.MATCH_PARENT);
-				eventIdView.setLayoutParams(params);
+				eventDateView.setLayoutParams(params);
 
 			}
 			return v;
@@ -315,6 +319,11 @@ public class EventsActivity extends CommonActivity {
 		protected Void doInBackground(Void... params) {
 			if (databaseExists || isConnected) {
 
+				// Get events from API
+				if (isConnected) {
+					getOnlineEvents();
+				}
+
 				// Get event from database
 				if (databaseExists) {
 					try {
@@ -324,10 +333,6 @@ public class EventsActivity extends CommonActivity {
 					}
 				}
 
-				// Get events from API
-				if (isConnected) {
-					getOnlineEvents();
-				}
 
 			} else {
 				noResources = true;
@@ -339,6 +344,17 @@ public class EventsActivity extends CommonActivity {
 		@Override
 		protected void onProgressUpdate(Event... event) {
 			super.onProgressUpdate(event);
+			for(Event e : events){
+				if(e.getId() == event[0].getId()){
+					e.setLocalEvent(true);
+					Event localEvent = events.get(events.indexOf(e));
+					events.remove(e);
+					events.add(0, localEvent);
+					events_adapter.notifyDataSetChanged();
+					
+					return;
+				}
+			}
 			events.add(event[0]);
 			events_adapter.notifyDataSetChanged();
 		}
@@ -369,9 +385,7 @@ public class EventsActivity extends CommonActivity {
 						Element element = (Element) node;
 
 						int id = Integer.parseInt(element.getAttribute("id"));
-						if (id == existingEventId) {
-							continue;
-						}
+
 						String title = element.getTextContent();
 						String endDate = element.getAttribute("enddate");
 						String deadline = element.getAttribute("deadline");
@@ -409,19 +423,19 @@ public class EventsActivity extends CommonActivity {
 
 			if (dbUserId == userId) {
 				columns = new String[] { ScanwareLiteOpenHelper.EVENT_KEY_ID,
-						ScanwareLiteOpenHelper.EVENT_KEY_TITLE };
+						ScanwareLiteOpenHelper.EVENT_KEY_TITLE};
 
 				cursor = db.query(ScanwareLiteOpenHelper.EVENTS_TABLE, columns,
 						null, null, null, null, null, "1");
 				if (cursor != null && cursor.moveToFirst()) {
-					existingEventId = cursor
+					int eventId = cursor
 							.getInt(cursor
 									.getColumnIndex(ScanwareLiteOpenHelper.EVENT_KEY_ID));
-					String existingEventTitle = cursor
+					String eventTitle = cursor
 							.getString(cursor
 									.getColumnIndex(ScanwareLiteOpenHelper.EVENT_KEY_TITLE));
-					Event existingEvent = new Event(existingEventId,
-							existingEventTitle + "*", null, null);
+					existingEvent = new Event(eventId,
+							eventTitle, null, null);
 					publishProgress(existingEvent);
 				}
 			}

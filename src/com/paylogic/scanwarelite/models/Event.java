@@ -11,16 +11,19 @@ public class Event {
 	private String name;
 	private Date endDate;
 	private Date deadline;
-	
+	private boolean localEvent;
+
 	public Event(int id, String name, String endDate, String deadline) {
 		this.id = id;
 		this.name = name;
+		this.localEvent = false;
 		if (endDate != null) {
 			this.endDate = setEndDate(endDate);
 		}
 		if (deadline != null) {
 			this.deadline = setDeadline(deadline);
 		}
+
 	}
 
 	private Date setDeadline(String deadline) {
@@ -42,7 +45,18 @@ public class Event {
 		}
 		return null;
 	}
-	
+
+	public boolean isLocalEvent() {
+		return localEvent;
+	}
+
+	public void setLocalEvent(boolean isLocalEvent) {
+		this.localEvent = isLocalEvent;
+		if (isLocalEvent) {
+			this.name += "*";
+		}
+	}
+
 	public int getId() {
 		return id;
 	}
@@ -58,9 +72,9 @@ public class Event {
 	public Date getEndDate() {
 		return endDate;
 	}
-	
-	public void setName(String name){
+
+	public void setName(String name) {
 		this.name = name;
 	}
-	
+
 }
