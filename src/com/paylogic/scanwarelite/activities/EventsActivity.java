@@ -323,6 +323,10 @@ public class EventsActivity extends CommonActivity {
 		protected Void doInBackground(Void... params) {
 			if (databaseExists || isConnected) {
 
+				// if isConnected
+				// else if databaseExists
+				// else noResources = true;
+
 				// Get events from API
 				if (isConnected) {
 					getOnlineEvents();
@@ -350,6 +354,8 @@ public class EventsActivity extends CommonActivity {
 			for (Event e : events) {
 				if (e.getId() == event[0].getId()) {
 					e.setLocalEvent(true);
+
+					// Move local event to top
 					Event localEvent = events.get(events.indexOf(e));
 					events.remove(e);
 					events.add(0, localEvent);
