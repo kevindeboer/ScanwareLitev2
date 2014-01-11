@@ -112,8 +112,6 @@ public class EventsActivity extends CommonActivity {
 			public void onItemClick(AdapterView<?> parent, View view,
 					int position, long id) {
 				selectedEvent = events.get(position);
-				Toast.makeText(EventsActivity.this, selectedEvent.getName(),
-						Toast.LENGTH_LONG).show();
 				events_adapter.setSelectedIndex(position);
 
 				// Disable continue button for all events but the local event if
