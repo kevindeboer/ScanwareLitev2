@@ -112,6 +112,8 @@ public class EventsActivity extends CommonActivity {
 			public void onItemClick(AdapterView<?> parent, View view,
 					int position, long id) {
 				selectedEvent = events.get(position);
+				Toast.makeText(EventsActivity.this, selectedEvent.getName(),
+						Toast.LENGTH_LONG).show();
 				events_adapter.setSelectedIndex(position);
 
 				// Disable continue button for all events but the local event if
@@ -134,7 +136,8 @@ public class EventsActivity extends CommonActivity {
 		continueButton.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
 				if (selectedEvent != null) {
-					if (selectedEvent.getId() == existingEvent.getId()) {
+					if ((existingEvent != null)
+							&& (selectedEvent.getId() == existingEvent.getId())) {
 						if (!ConnectivityHelper
 								.isConnected(EventsActivity.this)) {
 							alertDialog = new OnlyReuseDialog(
@@ -161,6 +164,7 @@ public class EventsActivity extends CommonActivity {
 							R.string.toast_select_event, Toast.LENGTH_SHORT)
 							.show();
 				}
+
 			}
 		});
 
@@ -251,7 +255,7 @@ public class EventsActivity extends CommonActivity {
 			Event event = events.get(position);
 
 			String eventName = event.getName();
-			
+
 			DateFormat df = new SimpleDateFormat("dd-MM-yyyy");
 			Date eventEndDate = event.getEndDate();
 			String dateString = df.format(eventEndDate);
@@ -308,7 +312,7 @@ public class EventsActivity extends CommonActivity {
 		@Override
 		protected void onPostExecute(Void result) {
 			progressDialog.dismiss();
-			
+
 			if (noResources) {
 				alertDialog = new NoResourcesDialog(EventsActivity.this);
 				alertDialog.show();
@@ -333,7 +337,6 @@ public class EventsActivity extends CommonActivity {
 					}
 				}
 
-
 			} else {
 				noResources = true;
 			}
@@ -344,14 +347,14 @@ public class EventsActivity extends CommonActivity {
 		@Override
 		protected void onProgressUpdate(Event... event) {
 			super.onProgressUpdate(event);
-			for(Event e : events){
-				if(e.getId() == event[0].getId()){
+			for (Event e : events) {
+				if (e.getId() == event[0].getId()) {
 					e.setLocalEvent(true);
 					Event localEvent = events.get(events.indexOf(e));
 					events.remove(e);
 					events.add(0, localEvent);
 					events_adapter.notifyDataSetChanged();
-					
+
 					return;
 				}
 			}
@@ -423,7 +426,7 @@ public class EventsActivity extends CommonActivity {
 
 			if (dbUserId == userId) {
 				columns = new String[] { ScanwareLiteOpenHelper.EVENT_KEY_ID,
-						ScanwareLiteOpenHelper.EVENT_KEY_TITLE};
+						ScanwareLiteOpenHelper.EVENT_KEY_TITLE };
 
 				cursor = db.query(ScanwareLiteOpenHelper.EVENTS_TABLE, columns,
 						null, null, null, null, null, "1");
@@ -434,8 +437,7 @@ public class EventsActivity extends CommonActivity {
 					String eventTitle = cursor
 							.getString(cursor
 									.getColumnIndex(ScanwareLiteOpenHelper.EVENT_KEY_TITLE));
-					existingEvent = new Event(eventId,
-							eventTitle, null, null);
+					existingEvent = new Event(eventId, eventTitle, null, null);
 					publishProgress(existingEvent);
 				}
 			}
