@@ -253,11 +253,13 @@ public class EventsActivity extends CommonActivity {
 			Event event = events.get(position);
 
 			String eventName = event.getName();
-
-			DateFormat df = new SimpleDateFormat("dd-MM-yyyy");
 			Date eventEndDate = event.getEndDate();
-			String dateString = df.format(eventEndDate);
+			String dateString = null;
+			if (eventEndDate != null) {
+				DateFormat df = new SimpleDateFormat("dd-MM-yyyy");
 
+				dateString = df.format(eventEndDate);
+			}
 			TextView eventNameView = (TextView) v
 					.findViewById(R.id.textView_eventName);
 			TextView eventDateView = (TextView) v
@@ -271,8 +273,9 @@ public class EventsActivity extends CommonActivity {
 			if (event != null) {
 
 				eventNameView.setText(eventName);
-				eventDateView.setText("(" + dateString + ")");
-
+				if (dateString != null) {
+					eventDateView.setText("(" + dateString + ")");
+				}
 				params = new LayoutParams(
 						(int) (parent.getMeasuredWidth() * 0.7),
 						LayoutParams.WRAP_CONTENT);
