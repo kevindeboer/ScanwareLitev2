@@ -77,7 +77,8 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
-        android:hint="@string/version"
+        android:textColor="@color/version"
+        android:text="@string/version"
         android:textAppearance="?android:attr/textAppearanceSmall" />
 
 </RelativeLayout>

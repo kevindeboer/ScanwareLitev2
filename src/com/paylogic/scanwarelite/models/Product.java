@@ -2,6 +2,8 @@ package com.paylogic.scanwarelite.models;
 
 public class Product {
 
+	private int totalTickets;
+	private int checkedInTickets;
 	private int id;
 	private String title;
 	private boolean allowed;
@@ -34,5 +36,21 @@ public class Product {
 
 	public void setAllowed(boolean allowed) {
 		this.allowed = allowed;
+	}
+
+	public void setTotalTickets(int totalTickets) {
+		this.totalTickets = totalTickets;
+	}
+
+	public int getTotalTickets() {
+		return this.totalTickets;
+	}
+
+	public void setCheckedInTickets(int totalTickets) {
+		this.checkedInTickets = totalTickets;
+	}
+
+	public int getCheckedInTickets() {
+		return this.checkedInTickets;
 	}
 }

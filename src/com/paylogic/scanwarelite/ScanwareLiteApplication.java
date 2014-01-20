@@ -2,15 +2,16 @@ package com.paylogic.scanwarelite;
 
 import android.app.Application;
 
+import com.paylogic.scanwarelite.models.User;
+
 public class ScanwareLiteApplication extends Application {
 
-	private int userId;
-	private String username;
-	private String password;
+	private User user;
 	private boolean encrypted;
 	private boolean running;
-	public int getUserId() {
-		return userId;
+	
+	public User getUser() {
+		return user;
 	}
 
 	public boolean isEncrypted() {
@@ -29,24 +30,10 @@ public class ScanwareLiteApplication extends Application {
 		this.running = running;
 	}
 
-	public void setUserId(int userId) {
-		this.userId = userId;
+	public void setUser(User user) {
+		this.user = user;
 	}
 
-	public String getUsername() {
-		return username;
-	}
-
-	public void setUsername(String username) {
-		this.username = username;
-	}
-
-	public String getPassword() {
-		return password;
-	}
-
-	public void setPassword(String password) {
-		this.password = password;
-	}
+	
 
 }

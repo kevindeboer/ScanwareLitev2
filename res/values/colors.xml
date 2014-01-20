@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <color name="eventIdGrey">#778899</color>
+    <color name="eventDateGrey">#778899</color>
     <color name="selectedEvent">#9AC0CD</color>
     <color name="scanOK">#00FF00</color>
     <color name="scanInvalid">#FF0000</color>
     <color name="scanDisabled">#0000FF</color>
     <color name="deselectAllTextViewLine">#00bfff</color>
     <color name="selectAllTextViewLine">#00bfff</color>
-    
+    <color name="version">#C2C2C2</color>
     <color name="pressed_text_color">#00FF00</color>
     <color name="default_text_color">#00AAFF</color>
 	<color name="pressed_background_color">#CC00BFFF</color>

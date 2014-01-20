@@ -33,7 +33,6 @@ import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.paylogic.scanwarelite.PaymentCode;
 import com.paylogic.scanwarelite.R;
 import com.paylogic.scanwarelite.dialogs.scan.AlreadySeenDialog;
 import com.paylogic.scanwarelite.dialogs.scan.BarcodeNotFoundDialog;
@@ -169,6 +168,7 @@ public class ScanActivity extends CommonActivity {
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		super.onOptionsItemSelected(item);
+		Intent intent;
 		switch (item.getItemId()) {
 		case R.id.menu_manual_input:
 			alertDialog = new ManualInputDialog(ScanActivity.this);
@@ -177,7 +177,7 @@ public class ScanActivity extends CommonActivity {
 
 		case R.id.menu_settings:
 			flashlightEnabled = false;
-			Intent intent = new Intent(ScanActivity.this,
+			intent = new Intent(ScanActivity.this,
 					SettingsActivity.class);
 			startActivity(intent);
 			break;
@@ -200,7 +200,13 @@ public class ScanActivity extends CommonActivity {
 			stopScanning();
 			startScanningView.setVisibility(View.VISIBLE);
 			break;
+
+		case R.id.menu_view_statistics:
+			intent = new Intent(ScanActivity.this,
+					StatisticsActivity.class);
+			startActivity(intent);
 		}
+
 		return true;
 	}
 
@@ -228,14 +234,14 @@ public class ScanActivity extends CommonActivity {
 
 	public void startScanning() {
 		scanning = true;
-//		mCamera.setPreviewCallback(previewCb);
+		// mCamera.setPreviewCallback(previewCb);
 		invalidateOptionsMenu();
 	}
 
 	public void stopScanning() {
 		scanning = false;
-//		mCamera.setPreviewCallback(null);
-//		mPreview.getHolder().removeCallback(mPreview);
+		// mCamera.setPreviewCallback(null);
+		// mPreview.getHolder().removeCallback(mPreview);
 		invalidateOptionsMenu();
 	}
 
@@ -296,18 +302,15 @@ public class ScanActivity extends CommonActivity {
 								.getColumnIndex(ScanwareLiteOpenHelper.BARCODES_KEY_PAYSTATUS));
 
 				// TODO: Make this more specific
-				for (PaymentCode payCode : PaymentCode.values()) {
-					if (payCode.getCode() == payStatus) {
-						// payment error
-						alertDialog = new PaymentErrorDialog(ScanActivity.this,
-								barcode);
-						alertDialog.show();
+				if (payStatus != 102) {
+					alertDialog = new PaymentErrorDialog(ScanActivity.this,
+							barcode);
+					alertDialog.show();
 
-						mediaPlayer = MediaPlayer.create(ScanActivity.this,
-								R.raw.invalid);
-						mediaPlayer.start();
-						return;
-					}
+					mediaPlayer = MediaPlayer.create(ScanActivity.this,
+							R.raw.invalid);
+					mediaPlayer.start();
+					return;
 				}
 
 				boolean seen = cursor

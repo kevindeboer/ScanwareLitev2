@@ -14,18 +14,16 @@ import com.paylogic.scanwarelite.helpers.ScanwareLiteOpenHelper;
 
 public class DeleteDataDialog extends CommonAlertDialog {
 	private ScanwareLiteApplication app;
-	private SettingsActivity settingsActivity;
 	private CommonActivity commonActivity;
 	private SharedPreferences settings;
 	private String userFile;
 
 	public DeleteDataDialog(final Context context) {
 		super(context);
-		settingsActivity = (SettingsActivity) context;
 		commonActivity = (CommonActivity) context;
 		
-		app = (ScanwareLiteApplication) settingsActivity.getApplication();
-		settings = settingsActivity.getSharedPreferences(
+		app = (ScanwareLiteApplication) commonActivity.getApplication();
+		settings = commonActivity.getSharedPreferences(
 				PreferenceHelper.PREFS_FILE, Context.MODE_PRIVATE);
 		userFile = settings.getString(PreferenceHelper.KEY_USER_FILE, null);
 
@@ -34,13 +32,11 @@ public class DeleteDataDialog extends CommonAlertDialog {
 		
 		setButton(BUTTON_POSITIVE, context.getString(R.string.dialog_btn_ok), new OnClickListener() {
 			public void onClick(DialogInterface dialog, int id) {
-				settingsActivity.deleteFile(userFile);
-				settingsActivity
+				commonActivity.deleteFile(userFile);
+				commonActivity
 						.deleteDatabase(ScanwareLiteOpenHelper.DATABASE_NAME);
 
-				app.setUserId(-1);
-				app.setUsername(null);
-				app.setPassword(null);
+				app.setUser(null);
 
 				commonActivity.logout();
 			}

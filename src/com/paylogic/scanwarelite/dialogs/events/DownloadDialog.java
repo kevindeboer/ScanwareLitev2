@@ -9,16 +9,18 @@ import com.paylogic.scanwarelite.activities.EventsActivity;
 import com.paylogic.scanwarelite.activities.EventsActivity.DownloadSpqTask;
 import com.paylogic.scanwarelite.dialogs.CommonAlertDialog;
 import com.paylogic.scanwarelite.models.Event;
+import com.paylogic.scanwarelite.models.User;
 
 public class DownloadDialog extends CommonAlertDialog {
 	private EventsActivity eventsActivity;
 	private ScanwareLiteApplication app;
-
+	private User user;
 	public DownloadDialog(final Context context, final Event event) {
 		super(context);
 		setCanceledOnTouchOutside(false);
 		eventsActivity = (EventsActivity) context;
 		app = (ScanwareLiteApplication) eventsActivity.getApplication();
+		user= app.getUser();
 		
 		setTitle(context.getString(R.string.dialog_title_confirm_download));
 		setMessage(String.format(context.getString(R.string.dialog_msg_confirm_download), event.getName()));
@@ -27,7 +29,7 @@ public class DownloadDialog extends CommonAlertDialog {
 			
 				public void onClick(DialogInterface dialog, int which) {
 					DownloadSpqTask spqTask = eventsActivity.new DownloadSpqTask(
-							app.getUsername(), app.getPassword(), event);
+							user.getUsername(), user.getPassword(), event);
 					spqTask.execute();
 				}
 			

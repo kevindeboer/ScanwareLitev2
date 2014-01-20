@@ -9,16 +9,19 @@ import com.paylogic.scanwarelite.activities.EventsActivity;
 import com.paylogic.scanwarelite.activities.EventsActivity.DownloadSpqTask;
 import com.paylogic.scanwarelite.dialogs.CommonAlertDialog;
 import com.paylogic.scanwarelite.models.Event;
+import com.paylogic.scanwarelite.models.User;
 
 public class OverwriteDialog extends CommonAlertDialog {
 	private EventsActivity eventsActivity;
 	private ScanwareLiteApplication app;
+	private User user;
 
 	public OverwriteDialog(final Context context, final Event event) {
 		super(context);
 		eventsActivity = (EventsActivity) context;
 		app = (ScanwareLiteApplication) eventsActivity.getApplication();
-
+		user = app.getUser();
+		
 		setTitle(context.getString(R.string.dialog_title_overwrite));
 		setMessage(String.format(
 				context.getString(R.string.dialog_msg_overwrite),
@@ -29,7 +32,7 @@ public class OverwriteDialog extends CommonAlertDialog {
 				new OnClickListener() {
 					public void onClick(DialogInterface dialog, int which) {
 						DownloadSpqTask spqTask = eventsActivity.new DownloadSpqTask(
-								app.getUsername(), app.getPassword(), event);
+								user.getUsername(), user.getPassword(), event);
 						spqTask.execute();
 					}
 

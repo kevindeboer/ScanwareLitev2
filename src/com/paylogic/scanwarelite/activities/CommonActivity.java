@@ -15,6 +15,7 @@ import com.paylogic.scanwarelite.ExceptionHandler;
 import com.paylogic.scanwarelite.R;
 import com.paylogic.scanwarelite.ScanwareLiteApplication;
 import com.paylogic.scanwarelite.dialogs.menu.ExitDialog;
+import com.paylogic.scanwarelite.helpers.ConnectivityHelper;
 import com.paylogic.scanwarelite.helpers.ScanwareLiteOpenHelper;
 
 public class CommonActivity extends Activity {
@@ -24,6 +25,7 @@ public class CommonActivity extends Activity {
     protected ProgressDialog progressDialog;
     protected AlertDialog alertDialog;
     protected ScanwareLiteOpenHelper scanwareLiteOpenHelper;
+    protected ConnectivityHelper connHelper;
     protected SQLiteDatabase db;
 
     protected Resources resources;
@@ -94,6 +96,10 @@ public class CommonActivity extends Activity {
             break;
         }
         return true;
+    }
+    
+    public void setConnectivityHelper(ConnectivityHelper connHelper){ 
+    	this.connHelper = connHelper;
     }
     
     public void dismissDialog(){

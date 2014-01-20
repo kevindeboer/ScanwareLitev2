@@ -36,6 +36,7 @@ public class ScanwareLiteOpenHelper extends SQLiteOpenHelper {
 	public static final String BARCODES_KEY_CODE = "code";
 	public static final String BARCODES_KEY_NAME = "name";
 	public static final String BARCODES_KEY_PAYSTATUS = "payStatus";
+	public static final String BARCODES_KEY_PRODUCTID = "productID";
 	public static final String BARCODES_KEY_SEEN = "seen";
 	public static final String BARCODES_KEY_SEENDATE = "seenDate";
 	public static final String BARCODES_KEY_SCANNER = "scanner";

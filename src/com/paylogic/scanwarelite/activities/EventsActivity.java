@@ -60,6 +60,7 @@ import com.paylogic.scanwarelite.helpers.ConnectivityHelper;
 import com.paylogic.scanwarelite.helpers.PreferenceHelper;
 import com.paylogic.scanwarelite.helpers.ScanwareLiteOpenHelper;
 import com.paylogic.scanwarelite.models.Event;
+import com.paylogic.scanwarelite.models.User;
 import com.paylogic.scanwarelite.utils.FileUtils;
 
 public class EventsActivity extends CommonActivity {
@@ -73,13 +74,10 @@ public class EventsActivity extends CommonActivity {
 	private Event selectedEvent;
 
 	private GetEventsTask eventsTask;
-
-	private String username;
-	private String password;
-	private int userId;
 	private Event existingEvent;
 	private SharedPreferences settings;
 	private SharedPreferences.Editor editor;
+	private User user;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -87,12 +85,10 @@ public class EventsActivity extends CommonActivity {
 		setContentView(R.layout.activity_events);
 		settings = getSharedPreferences(PreferenceHelper.PREFS_FILE,
 				Context.MODE_PRIVATE);
-
+		setConnectivityHelper(new ConnectivityHelper());
 		events = new ArrayList<Event>();
 
-		username = app.getUsername();
-		password = app.getPassword();
-		userId = app.getUserId();
+		user = app.getUser();
 
 		eventsView = (ListView) findViewById(R.id.listView_events);
 		retryButton = (Button) findViewById(R.id.button_retry);
@@ -116,7 +112,7 @@ public class EventsActivity extends CommonActivity {
 
 				// Disable continue button for all events but the local event if
 				// internet connectivity is lost
-				if (!ConnectivityHelper.isConnected(EventsActivity.this)
+				if (!connHelper.isConnected(EventsActivity.this)
 						&& !(selectedEvent.getId() == existingEvent.getId())) {
 					continueButton.setClickable(false);
 				} else {
@@ -136,8 +132,7 @@ public class EventsActivity extends CommonActivity {
 				if (selectedEvent != null) {
 					if ((existingEvent != null)
 							&& (selectedEvent.getId() == existingEvent.getId())) {
-						if (!ConnectivityHelper
-								.isConnected(EventsActivity.this)) {
+						if (!connHelper.isConnected(EventsActivity.this)) {
 							alertDialog = new OnlyReuseDialog(
 									EventsActivity.this);
 							alertDialog.show();
@@ -307,7 +302,7 @@ public class EventsActivity extends CommonActivity {
 			events_adapter.notifyDataSetChanged();
 
 			databaseExists = databaseExists();
-			isConnected = ConnectivityHelper.isConnected(EventsActivity.this);
+			isConnected = connHelper.isConnected(EventsActivity.this);
 		}
 
 		@Override
@@ -354,7 +349,6 @@ public class EventsActivity extends CommonActivity {
 			super.onProgressUpdate(event);
 			for (Event e : events) {
 				if (e.getId() == event[0].getId()) {
-					e.setLocalEvent(true);
 
 					// Move local event to top
 					Event localEvent = events.get(events.indexOf(e));
@@ -371,8 +365,8 @@ public class EventsActivity extends CommonActivity {
 
 		private void getOnlineEvents() {
 			String command = "sparqMMList";
-			String urlParams = "&username=" + username + "&password="
-					+ password;
+			String urlParams = "&username=" + user.getUsername() + "&password="
+					+ user.getPassword();
 
 			String eventsUrl = url + command + urlParams;
 
@@ -431,7 +425,7 @@ public class EventsActivity extends CommonActivity {
 						.getColumnIndex(ScanwareLiteOpenHelper.USER_KEY_ID));
 			}
 
-			if (dbUserId == userId) {
+			if (dbUserId == user.getUserId()) {
 				columns = new String[] { ScanwareLiteOpenHelper.EVENT_KEY_ID,
 						ScanwareLiteOpenHelper.EVENT_KEY_TITLE };
 
@@ -445,6 +439,7 @@ public class EventsActivity extends CommonActivity {
 							.getString(cursor
 									.getColumnIndex(ScanwareLiteOpenHelper.EVENT_KEY_TITLE));
 					existingEvent = new Event(eventId, eventTitle, null, null);
+					existingEvent.setLocalEvent(true);
 					publishProgress(existingEvent);
 				}
 			}
