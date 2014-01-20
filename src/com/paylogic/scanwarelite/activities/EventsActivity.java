@@ -61,7 +61,6 @@ public class EventsActivity extends CommonActivity {
 	private Event selectedEvent;
 
 	private GetEventsTask eventsTask;
-	private Event existingEvent;
 	private SharedPreferences settings;
 	private SharedPreferences.Editor editor;
 	private User user;
@@ -101,7 +100,7 @@ public class EventsActivity extends CommonActivity {
 				// Disable continue button for all events but the local event if
 				// internet connectivity is lost
 				if (!connHelper.isConnected(EventsActivity.this)
-						&& !(selectedEvent.getId() == existingEvent.getId())) {
+						&& !(selectedEvent.getId() == eventsAdapter.getLocalEvent().getId())) {
 					continueButton.setClickable(false);
 				} else {
 					continueButton.setClickable(true);
@@ -118,8 +117,8 @@ public class EventsActivity extends CommonActivity {
 		continueButton.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
 				if (selectedEvent != null) {
-					if ((existingEvent != null)
-							&& (selectedEvent.getId() == existingEvent.getId())) {
+					if ((eventsAdapter.getLocalEvent() != null)
+							&& (selectedEvent.getId() == eventsAdapter.getLocalEvent().getId())) {
 						if (!connHelper.isConnected(EventsActivity.this)) {
 							alertDialog = new OnlyReuseDialog(
 									EventsActivity.this);
@@ -209,9 +208,6 @@ public class EventsActivity extends CommonActivity {
 
 	}
 
-	public void setExistingEvent(Event event) {
-		existingEvent = event;
-	}
 
 	public class EventsAdapter extends ArrayAdapter<Event> {
 		private int selectedIndex = -1;
@@ -238,12 +234,16 @@ public class EventsActivity extends CommonActivity {
 		}
 
 		public void addEvent(Event event) {
-			if (event.getId() == localEvent.getId()) {
+			if ((localEvent!= null) && (event.getId() == localEvent.getId())) {
 				localEvent.setDeadline(event.getDeadline());
 				localEvent.setEndDate(event.getEndDate());
 			} else {
 				events.add(event);
 			}
+		}
+		
+		public Event getLocalEvent(){
+			return localEvent;
 		}
 
 		@Override

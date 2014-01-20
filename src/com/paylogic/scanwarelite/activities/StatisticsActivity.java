@@ -78,9 +78,10 @@ public class StatisticsActivity extends CommonActivity {
 				+ ScanwareLiteOpenHelper.BARCODES_KEY_PRODUCTID
 				+ ", COUNT(*) FROM " + ScanwareLiteOpenHelper.BARCODES_TABLE
 				+ " WHERE " + ScanwareLiteOpenHelper.BARCODES_KEY_PAYSTATUS
+				+ "=? OR " + ScanwareLiteOpenHelper.BARCODES_KEY_PAYSTATUS
 				+ "=? GROUP BY "
 				+ ScanwareLiteOpenHelper.BARCODES_KEY_PRODUCTID;
-		String[] whereArgs = new String[] { "102" };
+		String[] whereArgs = new String[] { "101" , "102"};
 		Cursor cursor = db.rawQuery(query, whereArgs);
 		while (cursor.moveToNext()) {
 			int productID = cursor.getInt(0);
@@ -100,11 +101,12 @@ public class StatisticsActivity extends CommonActivity {
 		String query = "SELECT "
 				+ ScanwareLiteOpenHelper.BARCODES_KEY_PRODUCTID
 				+ ", COUNT(*) FROM " + ScanwareLiteOpenHelper.BARCODES_TABLE
-				+ " WHERE " + ScanwareLiteOpenHelper.BARCODES_KEY_PAYSTATUS
-				+ "=? AND " + ScanwareLiteOpenHelper.BARCODES_KEY_SEEN
+				+ " WHERE (" + ScanwareLiteOpenHelper.BARCODES_KEY_PAYSTATUS
+				+ "=? OR " + ScanwareLiteOpenHelper.BARCODES_KEY_PAYSTATUS
+				+ "=?) AND " + ScanwareLiteOpenHelper.BARCODES_KEY_SEEN
 				+ "=? GROUP BY "
 				+ ScanwareLiteOpenHelper.BARCODES_KEY_PRODUCTID;
-		String[] whereArgs = new String[] { "102" , "1"};
+		String[] whereArgs = new String[] { "101", "102" , "1"};
 		Cursor cursor = db.rawQuery(query, whereArgs);
 		while (cursor.moveToNext()) {
 			int productID = cursor.getInt(0);

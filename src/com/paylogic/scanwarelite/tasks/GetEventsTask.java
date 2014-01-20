@@ -142,6 +142,7 @@ public class GetEventsTask extends AsyncTask<Void, Void, Void> {
 
 				if (event.getEndDate().after(now)
 						|| showAllEvents) {
+					System.out.println();
 					eventsAdapter.addEvent(event);
 					publishProgress();
 				}

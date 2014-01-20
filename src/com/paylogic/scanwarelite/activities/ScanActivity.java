@@ -302,7 +302,7 @@ public class ScanActivity extends CommonActivity {
 								.getColumnIndex(ScanwareLiteOpenHelper.BARCODES_KEY_PAYSTATUS));
 
 				// TODO: Make this more specific
-				if (payStatus != 102) {
+				if (payStatus != 101 && payStatus != 102) {
 					alertDialog = new PaymentErrorDialog(ScanActivity.this,
 							barcode);
 					alertDialog.show();

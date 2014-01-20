@@ -62,9 +62,6 @@ public class LoginActivity extends Activity {
 		}
 		
 		apiFacade = new APIFacade();
-		
-		setOnlineLoginTask(new OnlineLoginTask(LoginActivity.this, apiFacade));
-		setOfflineLoginTask(new OfflineLoginTask(LoginActivity.this));
 	}
 
 	protected void onResume() {
@@ -107,8 +104,10 @@ public class LoginActivity extends Activity {
 
 		// if connected to internet
 		if (isConnected) {
+			setOnlineLoginTask(new OnlineLoginTask(LoginActivity.this, apiFacade));
 			onlineLoginTask.execute(username, password);
 		} else {
+			setOfflineLoginTask(new OfflineLoginTask(LoginActivity.this));
 			offlineLoginTask.execute(username, password);
 		}
 	}

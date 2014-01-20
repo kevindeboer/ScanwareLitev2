@@ -214,7 +214,7 @@ public class ProductsActivity extends CommonActivity {
 	}
 
 	private class GetProductsTask extends AsyncTask<Void, Product, Void> {
-
+		String eventName;
 		@Override
 		protected void onPreExecute() {
 			progressDialog = new GetProductsDialog(ProductsActivity.this);
@@ -227,6 +227,8 @@ public class ProductsActivity extends CommonActivity {
 
 		@Override
 		protected void onPostExecute(Void result) {
+			eventNameView.setText(String.format(
+					getString(R.string.tv_event_name), eventName));
 			progressDialog.dismiss();
 		}
 
@@ -257,11 +259,10 @@ public class ProductsActivity extends CommonActivity {
 					null, null, null, null, null, "1");
 			cursor.moveToFirst();
 
-			String eventName = cursor.getString(cursor
+			eventName = cursor.getString(cursor
 					.getColumnIndex(ScanwareLiteOpenHelper.EVENT_KEY_TITLE));
 
-			eventNameView.setText(String.format(
-					getString(R.string.tv_event_name), eventName));
+
 
 			return null;
 		}
