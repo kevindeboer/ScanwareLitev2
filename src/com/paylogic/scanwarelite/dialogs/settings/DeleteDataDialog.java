@@ -7,7 +7,6 @@ import android.content.SharedPreferences;
 import com.paylogic.scanwarelite.R;
 import com.paylogic.scanwarelite.ScanwareLiteApplication;
 import com.paylogic.scanwarelite.activities.CommonActivity;
-import com.paylogic.scanwarelite.activities.SettingsActivity;
 import com.paylogic.scanwarelite.dialogs.CommonAlertDialog;
 import com.paylogic.scanwarelite.helpers.PreferenceHelper;
 import com.paylogic.scanwarelite.helpers.ScanwareLiteOpenHelper;

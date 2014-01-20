@@ -11,21 +11,9 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
-
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteException;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -46,13 +34,12 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.paylogic.scanwarelite.APIFacade;
 import com.paylogic.scanwarelite.R;
 import com.paylogic.scanwarelite.dialogs.events.DownloadDialog;
 import com.paylogic.scanwarelite.dialogs.events.DownloadSpqDialog;
 import com.paylogic.scanwarelite.dialogs.events.Error500Dialog;
-import com.paylogic.scanwarelite.dialogs.events.GetEventsDialog;
 import com.paylogic.scanwarelite.dialogs.events.InsufficientStorageDialog;
-import com.paylogic.scanwarelite.dialogs.events.NoResourcesDialog;
 import com.paylogic.scanwarelite.dialogs.events.OnlyReuseDialog;
 import com.paylogic.scanwarelite.dialogs.events.OverwriteDialog;
 import com.paylogic.scanwarelite.dialogs.events.ReuseOrOverwriteDialog;
@@ -61,6 +48,7 @@ import com.paylogic.scanwarelite.helpers.PreferenceHelper;
 import com.paylogic.scanwarelite.helpers.ScanwareLiteOpenHelper;
 import com.paylogic.scanwarelite.models.Event;
 import com.paylogic.scanwarelite.models.User;
+import com.paylogic.scanwarelite.tasks.GetEventsTask;
 import com.paylogic.scanwarelite.utils.FileUtils;
 
 public class EventsActivity extends CommonActivity {
@@ -69,8 +57,7 @@ public class EventsActivity extends CommonActivity {
 	private Button retryButton;
 	private Button continueButton;
 
-	private ArrayList<Event> events;
-	private EventsAdapter events_adapter;
+	private EventsAdapter eventsAdapter;
 	private Event selectedEvent;
 
 	private GetEventsTask eventsTask;
@@ -78,27 +65,28 @@ public class EventsActivity extends CommonActivity {
 	private SharedPreferences settings;
 	private SharedPreferences.Editor editor;
 	private User user;
+	private ArrayList<Event> events;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_events);
+
+		setConnectivityHelper(new ConnectivityHelper());
+		setAPIFacade(new APIFacade());
 		settings = getSharedPreferences(PreferenceHelper.PREFS_FILE,
 				Context.MODE_PRIVATE);
-		setConnectivityHelper(new ConnectivityHelper());
 		events = new ArrayList<Event>();
-
 		user = app.getUser();
 
 		eventsView = (ListView) findViewById(R.id.listView_events);
 		retryButton = (Button) findViewById(R.id.button_retry);
 		continueButton = (Button) findViewById(R.id.button_event_continue);
-
-		events_adapter = new EventsAdapter(EventsActivity.this,
+		eventsAdapter = new EventsAdapter(EventsActivity.this,
 				android.R.layout.simple_list_item_1, events);
-		eventsView.setAdapter(events_adapter);
+		eventsView.setAdapter(eventsAdapter);
 
-		updateEvents();
+		updateEvents(apiFacade);
 	}
 
 	protected void onResume() {
@@ -107,8 +95,8 @@ public class EventsActivity extends CommonActivity {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View view,
 					int position, long id) {
-				selectedEvent = events.get(position);
-				events_adapter.setSelectedIndex(position);
+				selectedEvent = eventsAdapter.getItem(position);
+				eventsAdapter.setSelectedIndex(position);
 
 				// Disable continue button for all events but the local event if
 				// internet connectivity is lost
@@ -123,7 +111,7 @@ public class EventsActivity extends CommonActivity {
 
 		retryButton.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
-				updateEvents();
+				updateEvents(apiFacade);
 			}
 		});
 
@@ -143,7 +131,7 @@ public class EventsActivity extends CommonActivity {
 							alertDialog.show();
 
 						}
-					} else if (databaseExists()) {
+					} else if (scanwareLiteOpenHelper.databaseExists()) {
 						alertDialog = new OverwriteDialog(EventsActivity.this,
 								selectedEvent);
 						alertDialog.show();
@@ -199,7 +187,7 @@ public class EventsActivity extends CommonActivity {
 				editor.putBoolean(PreferenceHelper.KEY_SHOW_ALL, true);
 			}
 			editor.commit();
-			updateEvents();
+			updateEvents(apiFacade);
 			break;
 		}
 		return false;
@@ -210,21 +198,24 @@ public class EventsActivity extends CommonActivity {
 		// Do not return to login activity
 	}
 
-	private void updateEvents() {
+	private void updateEvents(APIFacade apiFacade) {
 
-		eventsTask = new GetEventsTask();
+		eventsTask = new GetEventsTask(EventsActivity.this, apiFacade, user,
+				eventsAdapter, scanwareLiteOpenHelper, connHelper,
+				settings.getBoolean("showAll", false));
 		eventsTask.execute();
-		events_adapter.setSelectedIndex(-1);
+		eventsAdapter.setSelectedIndex(-1);
 		selectedEvent = null;
 
 	}
 
-	private boolean databaseExists() {
-		return getDatabasePath(ScanwareLiteOpenHelper.DATABASE_NAME).exists();
+	public void setExistingEvent(Event event) {
+		existingEvent = event;
 	}
 
-	private class EventsAdapter extends ArrayAdapter<Event> {
+	public class EventsAdapter extends ArrayAdapter<Event> {
 		private int selectedIndex = -1;
+		private Event localEvent;
 
 		public EventsAdapter(Context context, int resource,
 				ArrayList<Event> events) {
@@ -234,6 +225,25 @@ public class EventsActivity extends CommonActivity {
 		public void setSelectedIndex(int index) {
 			selectedIndex = index;
 			notifyDataSetChanged();
+		}
+
+		public ArrayList<Event> getData() {
+			return events;
+		}
+
+		public void setLocalEvent(Event localEvent) {
+			localEvent.setName(localEvent.getName() + "*");
+			events.add(localEvent);
+			this.localEvent = localEvent;
+		}
+
+		public void addEvent(Event event) {
+			if (event.getId() == localEvent.getId()) {
+				localEvent.setDeadline(event.getDeadline());
+				localEvent.setEndDate(event.getEndDate());
+			} else {
+				events.add(event);
+			}
 		}
 
 		@Override
@@ -284,166 +294,7 @@ public class EventsActivity extends CommonActivity {
 			}
 			return v;
 		}
-	}
 
-	private class GetEventsTask extends AsyncTask<Void, Event, Void> {
-		private HttpURLConnection conn;
-		private String url = "https://api.paylogic.nl/API/?command=";
-		boolean databaseExists;
-		boolean isConnected;
-		boolean noResources;
-
-		@Override
-		protected void onPreExecute() {
-			progressDialog = new GetEventsDialog(EventsActivity.this);
-			progressDialog.show();
-
-			events.clear();
-			events_adapter.notifyDataSetChanged();
-
-			databaseExists = databaseExists();
-			isConnected = connHelper.isConnected(EventsActivity.this);
-		}
-
-		@Override
-		protected void onPostExecute(Void result) {
-			progressDialog.dismiss();
-
-			if (noResources) {
-				alertDialog = new NoResourcesDialog(EventsActivity.this);
-				alertDialog.show();
-			}
-		}
-
-		@Override
-		protected Void doInBackground(Void... params) {
-			if (databaseExists || isConnected) {
-
-				// if isConnected
-				// else if databaseExists
-				// else noResources = true;
-
-				// Get events from API
-				if (isConnected) {
-					getOnlineEvents();
-				}
-
-				// Get event from database
-				if (databaseExists) {
-					try {
-						getLocalEvent();
-					} catch (SQLiteException e) {
-
-					}
-				}
-
-			} else {
-				noResources = true;
-			}
-
-			return null;
-		}
-
-		@Override
-		protected void onProgressUpdate(Event... event) {
-			super.onProgressUpdate(event);
-			for (Event e : events) {
-				if (e.getId() == event[0].getId()) {
-
-					// Move local event to top
-					Event localEvent = events.get(events.indexOf(e));
-					events.remove(e);
-					events.add(0, localEvent);
-					events_adapter.notifyDataSetChanged();
-
-					return;
-				}
-			}
-			events.add(event[0]);
-			events_adapter.notifyDataSetChanged();
-		}
-
-		private void getOnlineEvents() {
-			String command = "sparqMMList";
-			String urlParams = "&username=" + user.getUsername() + "&password="
-					+ user.getPassword();
-
-			String eventsUrl = url + command + urlParams;
-
-			try {
-				URL url = new URL(eventsUrl);
-				conn = (HttpURLConnection) url.openConnection();
-				conn.setRequestMethod("GET");
-
-				DocumentBuilderFactory dbFactory = DocumentBuilderFactory
-						.newInstance();
-				DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-				Document doc = dBuilder.parse(conn.getInputStream());
-
-				Element root = doc.getDocumentElement();
-				NodeList modules = root.getElementsByTagName("module");
-
-				for (int i = 0; i < modules.getLength(); i++) {
-					Node node = modules.item(i);
-					if (node.getNodeType() == Node.ELEMENT_NODE) {
-						Element element = (Element) node;
-
-						int id = Integer.parseInt(element.getAttribute("id"));
-
-						String title = element.getTextContent();
-						String endDate = element.getAttribute("enddate");
-						String deadline = element.getAttribute("deadline");
-
-						Event event = new Event(id, title, endDate, deadline);
-
-						Date now = new Date();
-
-						if (event.getEndDate().after(now)
-								|| settings.getBoolean("showAll", false)) {
-							publishProgress(event);
-						}
-					}
-				}
-			} catch (IOException e) {
-				e.printStackTrace();
-			} catch (ParserConfigurationException e) {
-				e.printStackTrace();
-			} catch (SAXException e) {
-				e.printStackTrace();
-			}
-		}
-
-		private void getLocalEvent() {
-			db = scanwareLiteOpenHelper.getReadableDatabase();
-			String[] columns = new String[] { ScanwareLiteOpenHelper.USER_KEY_ID };
-			Cursor cursor = db.query(ScanwareLiteOpenHelper.USER_TABLE,
-					columns, null, null, null, null, null, "1");
-
-			int dbUserId = 0;
-			if (cursor != null && cursor.moveToFirst()) {
-				dbUserId = cursor.getInt(cursor
-						.getColumnIndex(ScanwareLiteOpenHelper.USER_KEY_ID));
-			}
-
-			if (dbUserId == user.getUserId()) {
-				columns = new String[] { ScanwareLiteOpenHelper.EVENT_KEY_ID,
-						ScanwareLiteOpenHelper.EVENT_KEY_TITLE };
-
-				cursor = db.query(ScanwareLiteOpenHelper.EVENTS_TABLE, columns,
-						null, null, null, null, null, "1");
-				if (cursor != null && cursor.moveToFirst()) {
-					int eventId = cursor
-							.getInt(cursor
-									.getColumnIndex(ScanwareLiteOpenHelper.EVENT_KEY_ID));
-					String eventTitle = cursor
-							.getString(cursor
-									.getColumnIndex(ScanwareLiteOpenHelper.EVENT_KEY_TITLE));
-					existingEvent = new Event(eventId, eventTitle, null, null);
-					existingEvent.setLocalEvent(true);
-					publishProgress(existingEvent);
-				}
-			}
-		}
 	}
 
 	public class DownloadSpqTask extends AsyncTask<Void, Integer, Void> {

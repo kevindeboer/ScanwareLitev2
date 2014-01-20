@@ -11,6 +11,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
+import com.paylogic.scanwarelite.APIFacade;
 import com.paylogic.scanwarelite.ExceptionHandler;
 import com.paylogic.scanwarelite.R;
 import com.paylogic.scanwarelite.ScanwareLiteApplication;
@@ -29,6 +30,8 @@ public class CommonActivity extends Activity {
     protected SQLiteDatabase db;
 
     protected Resources resources;
+
+	protected APIFacade apiFacade;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -102,6 +105,10 @@ public class CommonActivity extends Activity {
     	this.connHelper = connHelper;
     }
     
+    public void setAPIFacade(APIFacade apiFacade){
+    	this.apiFacade = apiFacade;
+    }
+    
     public void dismissDialog(){
     	alertDialog.dismiss();
     }
@@ -112,4 +119,6 @@ public class CommonActivity extends Activity {
         startActivity(intent);
         finish();
     }
+    
+
 }

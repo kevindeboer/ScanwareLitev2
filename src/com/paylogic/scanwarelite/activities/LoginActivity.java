@@ -11,8 +11,6 @@ import android.widget.Button;
 import android.widget.EditText;
 
 import com.paylogic.scanwarelite.APIFacade;
-import com.paylogic.scanwarelite.OfflineLoginTask;
-import com.paylogic.scanwarelite.OnlineLoginTask;
 import com.paylogic.scanwarelite.R;
 import com.paylogic.scanwarelite.dialogs.UnhandledExceptionDialog;
 import com.paylogic.scanwarelite.dialogs.login.EmptyInputDialog;
@@ -20,6 +18,8 @@ import com.paylogic.scanwarelite.dialogs.login.EmptyPasswordDialog;
 import com.paylogic.scanwarelite.dialogs.login.EmptyUsernameDialog;
 import com.paylogic.scanwarelite.helpers.ConnectivityHelper;
 import com.paylogic.scanwarelite.helpers.PreferenceHelper;
+import com.paylogic.scanwarelite.tasks.OfflineLoginTask;
+import com.paylogic.scanwarelite.tasks.OnlineLoginTask;
 
 public class LoginActivity extends Activity {
 
@@ -64,7 +64,7 @@ public class LoginActivity extends Activity {
 		apiFacade = new APIFacade();
 		
 		setOnlineLoginTask(new OnlineLoginTask(LoginActivity.this, apiFacade));
-		setOfflineLoginTask(new OfflineLoginTask(LoginActivity.this, apiFacade));
+		setOfflineLoginTask(new OfflineLoginTask(LoginActivity.this));
 	}
 
 	protected void onResume() {

@@ -5,12 +5,12 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
-import com.paylogic.scanwarelite.utils.FileUtils;
-
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.database.sqlite.SQLiteOpenHelper;
+
+import com.paylogic.scanwarelite.utils.FileUtils;
 
 public class ScanwareLiteOpenHelper extends SQLiteOpenHelper {
 
@@ -44,10 +44,13 @@ public class ScanwareLiteOpenHelper extends SQLiteOpenHelper {
 	public static final String USER_KEY_ID = "id";
 	public static final String USER_KEY_SUPERUSER = "superUser";
 	public static final String USER_KEY_SCANNER = "scanner";
-
+	
+	private Context context;
+	
 	public ScanwareLiteOpenHelper(Context context, String name,
 			CursorFactory factory, int version) {
 		super(context, name, factory, version);
+		this.context = context;
 	}
 
 	@Override
@@ -58,6 +61,10 @@ public class ScanwareLiteOpenHelper extends SQLiteOpenHelper {
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 
+	}
+	
+	public boolean databaseExists() {
+		return context.getDatabasePath(ScanwareLiteOpenHelper.DATABASE_NAME).exists();
 	}
 
 	public boolean importDatabase(String dbFilePath) throws IOException {

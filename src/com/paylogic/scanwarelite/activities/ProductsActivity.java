@@ -2,7 +2,6 @@ package com.paylogic.scanwarelite.activities;
 
 import java.util.ArrayList;
 
-import android.app.ProgressDialog;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
@@ -25,6 +24,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.paylogic.scanwarelite.R;
+import com.paylogic.scanwarelite.dialogs.products.GetProductsDialog;
 import com.paylogic.scanwarelite.helpers.ScanwareLiteOpenHelper;
 import com.paylogic.scanwarelite.models.Product;
 
@@ -217,13 +217,7 @@ public class ProductsActivity extends CommonActivity {
 
 		@Override
 		protected void onPreExecute() {
-			progressDialog = new ProgressDialog(ProductsActivity.this);
-			progressDialog
-					.setTitle(getString(R.string.title_retrieving_products));
-			progressDialog
-					.setMessage(getString(R.string.msg_retrieving_products));
-			progressDialog.setCancelable(false);
-			progressDialog.setIndeterminate(true);
+			progressDialog = new GetProductsDialog(ProductsActivity.this);
 			progressDialog.show();
 			products.clear();
 			products_adapter.notifyDataSetChanged();

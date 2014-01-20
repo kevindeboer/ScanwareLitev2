@@ -71,8 +71,8 @@
     <string name="tv_event_name">Event: %1$s</string>
     <string name="tv_deselect_all">Deselect all</string>
     <string name="tv_select_all">Select all</string>
-    <string name="msg_retrieving_products">Please wait</string>
-    <string name="title_retrieving_products">Retrieving products</string>
+    <string name="dialog_msg_retrieving_products">Please wait</string>
+    <string name="dialog_title_retrieving_products">Retrieving products</string>
     <string name="tv_products_title">Select your products</string>
 
     <!-- Scan -->
@@ -104,7 +104,7 @@
     <!-- Statistics -->
     <string name="tv_statistics">Statistics</string>
     <string name="tv_tickets_checked_in"> %1$s: (%2$s/%3$s)</string>
-    
+
     <!-- Menu -->
     <string name="menu_item_show_all_events">Show all events</string>
     <string name="menu_item_show_active_events">Show active events</string>
