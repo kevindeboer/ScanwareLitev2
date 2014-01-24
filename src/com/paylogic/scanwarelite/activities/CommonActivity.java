@@ -109,6 +109,10 @@ public class CommonActivity extends Activity {
     	this.apiFacade = apiFacade;
     }
     
+    public void setScanwareLiteOpenHelper(ScanwareLiteOpenHelper scanwareliteOpenHelper){
+    	this.scanwareLiteOpenHelper = scanwareliteOpenHelper;
+    }
+    
     public void dismissDialog(){
     	alertDialog.dismiss();
     }

@@ -67,6 +67,7 @@ public class ScanwareLiteOpenHelper extends SQLiteOpenHelper {
 		return context.getDatabasePath(ScanwareLiteOpenHelper.DATABASE_NAME).exists();
 	}
 
+
 	public boolean importDatabase(String dbFilePath) throws IOException {
 
 		// Close the SQLiteOpenHelper so it will commit the created empty

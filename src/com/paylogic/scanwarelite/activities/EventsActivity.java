@@ -11,9 +11,19 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
+import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteException;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -39,7 +49,9 @@ import com.paylogic.scanwarelite.R;
 import com.paylogic.scanwarelite.dialogs.events.DownloadDialog;
 import com.paylogic.scanwarelite.dialogs.events.DownloadSpqDialog;
 import com.paylogic.scanwarelite.dialogs.events.Error500Dialog;
+import com.paylogic.scanwarelite.dialogs.events.GetEventsDialog;
 import com.paylogic.scanwarelite.dialogs.events.InsufficientStorageDialog;
+import com.paylogic.scanwarelite.dialogs.events.NoResourcesDialog;
 import com.paylogic.scanwarelite.dialogs.events.OnlyReuseDialog;
 import com.paylogic.scanwarelite.dialogs.events.OverwriteDialog;
 import com.paylogic.scanwarelite.dialogs.events.ReuseOrOverwriteDialog;
@@ -48,13 +60,12 @@ import com.paylogic.scanwarelite.helpers.PreferenceHelper;
 import com.paylogic.scanwarelite.helpers.ScanwareLiteOpenHelper;
 import com.paylogic.scanwarelite.models.Event;
 import com.paylogic.scanwarelite.models.User;
-import com.paylogic.scanwarelite.tasks.GetEventsTask;
 import com.paylogic.scanwarelite.utils.FileUtils;
 
 public class EventsActivity extends CommonActivity {
 
 	private ListView eventsView;
-	private Button retryButton;
+	private Button refreshButton;
 	private Button continueButton;
 
 	private EventsAdapter eventsAdapter;
@@ -71,7 +82,7 @@ public class EventsActivity extends CommonActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_events);
 
-		setConnectivityHelper(new ConnectivityHelper());
+		setConnectivityHelper(new ConnectivityHelper(EventsActivity.this));
 		setAPIFacade(new APIFacade());
 		settings = getSharedPreferences(PreferenceHelper.PREFS_FILE,
 				Context.MODE_PRIVATE);
@@ -79,7 +90,7 @@ public class EventsActivity extends CommonActivity {
 		user = app.getUser();
 
 		eventsView = (ListView) findViewById(R.id.listView_events);
-		retryButton = (Button) findViewById(R.id.button_retry);
+		refreshButton = (Button) findViewById(R.id.button_refresh);
 		continueButton = (Button) findViewById(R.id.button_event_continue);
 		eventsAdapter = new EventsAdapter(EventsActivity.this,
 				android.R.layout.simple_list_item_1, events);
@@ -99,8 +110,9 @@ public class EventsActivity extends CommonActivity {
 
 				// Disable continue button for all events but the local event if
 				// internet connectivity is lost
-				if (!connHelper.isConnected(EventsActivity.this)
-						&& !(selectedEvent.getId() == eventsAdapter.getLocalEvent().getId())) {
+				if (!connHelper.isConnected()
+						&& !(selectedEvent.getId() == eventsAdapter
+								.getLocalEvent().getId())) {
 					continueButton.setClickable(false);
 				} else {
 					continueButton.setClickable(true);
@@ -108,7 +120,7 @@ public class EventsActivity extends CommonActivity {
 			}
 		});
 
-		retryButton.setOnClickListener(new OnClickListener() {
+		refreshButton.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
 				updateEvents(apiFacade);
 			}
@@ -118,8 +130,9 @@ public class EventsActivity extends CommonActivity {
 			public void onClick(View v) {
 				if (selectedEvent != null) {
 					if ((eventsAdapter.getLocalEvent() != null)
-							&& (selectedEvent.getId() == eventsAdapter.getLocalEvent().getId())) {
-						if (!connHelper.isConnected(EventsActivity.this)) {
+							&& (selectedEvent.getId() == eventsAdapter
+									.getLocalEvent().getId())) {
+						if (!connHelper.isConnected()) {
 							alertDialog = new OnlyReuseDialog(
 									EventsActivity.this);
 							alertDialog.show();
@@ -199,15 +212,13 @@ public class EventsActivity extends CommonActivity {
 
 	private void updateEvents(APIFacade apiFacade) {
 
-		eventsTask = new GetEventsTask(EventsActivity.this, apiFacade, user,
-				eventsAdapter, scanwareLiteOpenHelper, connHelper,
-				settings.getBoolean("showAll", false));
+		eventsTask = new GetEventsTask(settings.getBoolean(
+				PreferenceHelper.KEY_SHOW_ALL, false));
 		eventsTask.execute();
 		eventsAdapter.setSelectedIndex(-1);
 		selectedEvent = null;
 
 	}
-
 
 	public class EventsAdapter extends ArrayAdapter<Event> {
 		private int selectedIndex = -1;
@@ -234,15 +245,15 @@ public class EventsActivity extends CommonActivity {
 		}
 
 		public void addEvent(Event event) {
-			if ((localEvent!= null) && (event.getId() == localEvent.getId())) {
+			if ((localEvent != null) && (event.getId() == localEvent.getId())) {
 				localEvent.setDeadline(event.getDeadline());
 				localEvent.setEndDate(event.getEndDate());
 			} else {
 				events.add(event);
 			}
 		}
-		
-		public Event getLocalEvent(){
+
+		public Event getLocalEvent() {
 			return localEvent;
 		}
 
@@ -435,6 +446,133 @@ public class EventsActivity extends CommonActivity {
 			} else {
 				publishProgress(NOT_ENOUGH_DISK_SPACE);
 				return false;
+			}
+		}
+
+	}
+
+	public class GetEventsTask extends AsyncTask<Void, Void, Void> {
+		boolean databaseExists;
+		boolean isConnected;
+		boolean noResources;
+		private APIFacade apiFacade;
+		private ConnectivityHelper connHelper;
+
+		private boolean showAllEvents;
+
+		public GetEventsTask(boolean showAllEvents) {
+			this.showAllEvents = showAllEvents;
+		}
+
+		@Override
+		protected void onPreExecute() {
+			progressDialog = new GetEventsDialog(EventsActivity.this);
+			progressDialog.show();
+
+			eventsAdapter.clear();
+			eventsAdapter.notifyDataSetChanged();
+
+			databaseExists = scanwareLiteOpenHelper.databaseExists();
+			isConnected = connHelper.isConnected();
+		}
+
+		@Override
+		protected Void doInBackground(Void... params) {
+			if (databaseExists || isConnected) {
+
+				// Get event from database
+				if (databaseExists) {
+					try {
+						getLocalEvent();
+					} catch (SQLiteException e) {
+
+					}
+				}
+
+				// Get events from API
+				if (isConnected) {
+					getOnlineEvents();
+				}
+			} else {
+				noResources = true;
+			}
+			return null;
+		}
+
+		private void getLocalEvent() {
+			db = scanwareLiteOpenHelper.getReadableDatabase();
+			String[] columns = new String[] { ScanwareLiteOpenHelper.USER_KEY_ID };
+			Cursor cursor = db.query(ScanwareLiteOpenHelper.USER_TABLE,
+					columns, null, null, null, null, null, "1");
+
+			int dbUserId = 0;
+			if (cursor != null && cursor.moveToFirst()) {
+				dbUserId = cursor.getInt(cursor
+						.getColumnIndex(ScanwareLiteOpenHelper.USER_KEY_ID));
+			}
+
+			if (dbUserId == user.getUserId()) {
+				columns = new String[] { ScanwareLiteOpenHelper.EVENT_KEY_ID,
+						ScanwareLiteOpenHelper.EVENT_KEY_TITLE };
+
+				cursor = db.query(ScanwareLiteOpenHelper.EVENTS_TABLE, columns,
+						null, null, null, null, null, "1");
+				if (cursor != null && cursor.moveToFirst()) {
+					int eventId = cursor
+							.getInt(cursor
+									.getColumnIndex(ScanwareLiteOpenHelper.EVENT_KEY_ID));
+					String eventTitle = cursor
+							.getString(cursor
+									.getColumnIndex(ScanwareLiteOpenHelper.EVENT_KEY_TITLE));
+					Event localEvent = new Event(eventId, eventTitle, null,
+							null);
+					eventsAdapter.setLocalEvent(localEvent);
+					publishProgress();
+				}
+			}
+		}
+
+		private void getOnlineEvents() {
+			Document response = apiFacade.getEvents(user);
+
+			Element root = response.getDocumentElement();
+			NodeList modules = root.getElementsByTagName("module");
+
+			for (int i = 0; i < modules.getLength(); i++) {
+				Node node = modules.item(i);
+				if (node.getNodeType() == Node.ELEMENT_NODE) {
+					Element element = (Element) node;
+
+					int id = Integer.parseInt(element.getAttribute("id"));
+
+					String title = element.getTextContent();
+					String endDate = element.getAttribute("enddate");
+					String deadline = element.getAttribute("deadline");
+
+					Event event = new Event(id, title, endDate, deadline);
+
+					Date now = new Date();
+
+					if (event.getEndDate().after(now) || showAllEvents) {
+						eventsAdapter.addEvent(event);
+						publishProgress();
+					}
+				}
+			}
+		}
+
+		@Override
+		protected void onProgressUpdate(Void... args) {
+			eventsAdapter.notifyDataSetChanged();
+		}
+
+		@Override
+		protected void onPostExecute(Void result) {
+			progressDialog.dismiss();
+
+			if (noResources) {
+				alertDialog = new NoResourcesDialog(EventsActivity.this);
+				alertDialog.show();
 			}
 		}
 

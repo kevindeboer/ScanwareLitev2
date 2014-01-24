@@ -18,8 +18,8 @@
     
     <!-- Login -->
     <string name="btn_login">Login</string>
-    <string name="et_password_hint">Password</string>
-    <string name="et_username_hint">Username</string>
+    <string name="et_password_hint">password</string>
+    <string name="et_username_hint">username</string>
     <string name="dialog_msg_attempting_login">Please wait&#8230;</string>
     <string name="dialog_msg_invalid_credentials">The given credentials did not match</string>
     <string name="dialog_msg_no_credentials">Please input your credentials</string>
