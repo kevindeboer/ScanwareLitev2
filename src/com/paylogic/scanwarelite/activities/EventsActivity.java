@@ -74,6 +74,11 @@ public class EventsActivity extends CommonActivity {
 	private GetEventsTask eventsTask;
 	private SharedPreferences settings;
 	private SharedPreferences.Editor editor;
+	
+	private String username;
+	private String password;
+	private int userId;
+	
 	private User user;
 	private ArrayList<Event> events;
 
@@ -87,16 +92,24 @@ public class EventsActivity extends CommonActivity {
 		settings = getSharedPreferences(PreferenceHelper.PREFS_FILE,
 				Context.MODE_PRIVATE);
 		events = new ArrayList<Event>();
-		user = app.getUser();
-
+		
+		Intent intent = getIntent();
+		
+		username = intent.getStringExtra("username");
+		password = intent.getStringExtra("password");
+		userId = intent.getIntExtra("userId", -1);
+		
+		user = User.createInstance(userId, username, password);
+		
 		eventsView = (ListView) findViewById(R.id.listView_events);
 		refreshButton = (Button) findViewById(R.id.button_refresh);
 		continueButton = (Button) findViewById(R.id.button_event_continue);
+		
 		eventsAdapter = new EventsAdapter(EventsActivity.this,
 				android.R.layout.simple_list_item_1, events);
 		eventsView.setAdapter(eventsAdapter);
 
-		updateEvents(apiFacade);
+		updateEvents();
 	}
 
 	protected void onResume() {
@@ -122,7 +135,7 @@ public class EventsActivity extends CommonActivity {
 
 		refreshButton.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
-				updateEvents(apiFacade);
+				updateEvents();
 			}
 		});
 
@@ -199,7 +212,7 @@ public class EventsActivity extends CommonActivity {
 				editor.putBoolean(PreferenceHelper.KEY_SHOW_ALL, true);
 			}
 			editor.commit();
-			updateEvents(apiFacade);
+			updateEvents();
 			break;
 		}
 		return false;
@@ -210,7 +223,7 @@ public class EventsActivity extends CommonActivity {
 		// Do not return to login activity
 	}
 
-	private void updateEvents(APIFacade apiFacade) {
+	private void updateEvents() {
 
 		eventsTask = new GetEventsTask(settings.getBoolean(
 				PreferenceHelper.KEY_SHOW_ALL, false));
@@ -455,8 +468,6 @@ public class EventsActivity extends CommonActivity {
 		boolean databaseExists;
 		boolean isConnected;
 		boolean noResources;
-		private APIFacade apiFacade;
-		private ConnectivityHelper connHelper;
 
 		private boolean showAllEvents;
 
@@ -575,6 +586,5 @@ public class EventsActivity extends CommonActivity {
 				alertDialog.show();
 			}
 		}
-
 	}
 }

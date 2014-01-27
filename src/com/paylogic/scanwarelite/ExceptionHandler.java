@@ -14,6 +14,7 @@ import java.util.Date;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Environment;
+import android.util.Log;
 
 import com.paylogic.scanwarelite.activities.LoginActivity;
 
@@ -38,6 +39,8 @@ public class ExceptionHandler implements
 		stackTrace = new StringWriter();
 		exception.printStackTrace(new PrintWriter(stackTrace));
 		stackTraceString = stackTrace.toString();
+		
+		Log.e("Error", stackTraceString);
 
 		now = new Date();
 		DateFormat df = new SimpleDateFormat("dd-MM-yyyy_HH:mm:ss");

@@ -7,6 +7,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
+import com.paylogic.scanwarelite.security.BCrypt;
+
 import android.content.Context;
 
 public class OfflineLoginHelper {
@@ -53,8 +55,14 @@ public class OfflineLoginHelper {
 		}
 		return fileContent;
 	}
-	
-	public void deleteUserFile(){
+
+	public void deleteUserFile() {
 		context.deleteFile(userFile);
+	}
+
+	public boolean checkCredentials(String username, String usernameHash,
+			String password, String passwordHash) {
+		return BCrypt.checkpw(password, passwordHash)
+				&& BCrypt.checkpw(username, usernameHash);
 	}
 }

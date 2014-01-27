@@ -13,7 +13,6 @@ import com.paylogic.scanwarelite.helpers.PreferenceHelper;
 import com.paylogic.scanwarelite.helpers.ScanwareLiteOpenHelper;
 
 public class DeleteDataDialog extends CommonAlertDialog {
-	private ScanwareLiteApplication app;
 	private CommonActivity commonActivity;
 	private OfflineLoginHelper olHelper;
 
@@ -21,28 +20,28 @@ public class DeleteDataDialog extends CommonAlertDialog {
 		super(context);
 		commonActivity = (CommonActivity) context;
 		olHelper = new OfflineLoginHelper(context);
-		app = (ScanwareLiteApplication) commonActivity.getApplication();
 
 		setTitle(context.getString(R.string.dialog_title_delete_data));
 		setMessage(context.getString(R.string.dialog_msg_delete_data));
-		
-		setButton(BUTTON_POSITIVE, context.getString(R.string.dialog_btn_ok), new OnClickListener() {
-			public void onClick(DialogInterface dialog, int id) {
-				olHelper.deleteUserFile();
-				commonActivity
-						.deleteDatabase(ScanwareLiteOpenHelper.DATABASE_NAME);
 
-				app.setUser(null);
+		setButton(BUTTON_POSITIVE, context.getString(R.string.dialog_btn_ok),
+				new OnClickListener() {
+					public void onClick(DialogInterface dialog, int id) {
+						olHelper.deleteUserFile();
+						commonActivity
+								.deleteDatabase(ScanwareLiteOpenHelper.DATABASE_NAME);
 
-				commonActivity.logout();
-			}
-		});
-		
-		setButton(BUTTON_NEGATIVE, context.getString(R.string.dialog_btn_cancel), new OnClickListener() {
-			public void onClick(DialogInterface dialog, int id) {
-				dialog.cancel();
-			}
-		});
-		
+						commonActivity.logout();
+					}
+				});
+
+		setButton(BUTTON_NEGATIVE,
+				context.getString(R.string.dialog_btn_cancel),
+				new OnClickListener() {
+					public void onClick(DialogInterface dialog, int id) {
+						dialog.cancel();
+					}
+				});
+
 	}
 }

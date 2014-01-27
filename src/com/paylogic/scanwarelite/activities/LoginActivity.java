@@ -53,9 +53,10 @@ public class LoginActivity extends Activity {
 
 	private String username;
 	private String password;
+	private int userId;
+	
 	private String passwordHash;
 	private String usernameHash;
-	private User user;
 
 	private ScanwareLiteApplication app;
 
@@ -94,6 +95,7 @@ public class LoginActivity extends Activity {
 
 	}
 
+	@Override
 	protected void onResume() {
 		super.onResume();
 		loginButton.setOnClickListener(new OnClickListener() {
@@ -105,6 +107,17 @@ public class LoginActivity extends Activity {
 
 			}
 		});
+	}
+
+	@Override
+	protected void onPause() {
+		super.onPause();
+		if (progressDialog != null) {
+			progressDialog.dismiss();
+		}
+		if (alertDialog != null) {
+			alertDialog.dismiss();
+		}
 	}
 
 	public void handleLogin(String username, String password,
@@ -134,13 +147,13 @@ public class LoginActivity extends Activity {
 		if (isConnected) {
 			onlineLoginTask.execute(username, password);
 
-			// A task can not be executed twice, so a new task needs to be
+			// A task cannot be executed twice, so a new task needs to be
 			// created for the next time you click the button
 			onlineLoginTask = new OnlineLoginTask();
 		} else {
 			offlineLoginTask.execute(username, password);
 
-			// A task can not be executed twice, so a new task needs to be
+			// A task cannot be executed twice, so a new task needs to be
 			// created for the next time you click the button
 			offlineLoginTask = new OfflineLoginTask();
 		}
@@ -166,13 +179,13 @@ public class LoginActivity extends Activity {
 
 		private int result = 0;
 
-		private OfflineLoginHelper olHelper;
+		private OfflineLoginHelper offlineLoginHelper;
 
 		// Used for tests
 		private TaskListener listener;
 
 		public OfflineLoginTask() {
-			this.olHelper = new OfflineLoginHelper(context);
+			this.offlineLoginHelper = new OfflineLoginHelper(context);
 		}
 
 		@Override
@@ -185,20 +198,20 @@ public class LoginActivity extends Activity {
 		protected Void doInBackground(String... params) {
 			username = params[0];
 			password = params[1];
-			if (olHelper.userFileExists()) {
-				String fileContent = olHelper.getUserFileContent();
+
+			if (offlineLoginHelper.userFileExists()) {
+				String fileContent = offlineLoginHelper.getUserFileContent();
 				String[] contents = fileContent.split(" ");
 
 				int userId = Integer.parseInt(contents[0]);
 				usernameHash = contents[1];
 				passwordHash = contents[2];
-				System.out.println();
-				boolean match = (BCrypt.checkpw(password, passwordHash) && BCrypt
-						.checkpw(username, usernameHash));
-				// boolean match = true;
+
+				boolean match = offlineLoginHelper.checkCredentials(username,
+						usernameHash, password, passwordHash);
+
 				if (match) {
 					result = validLocalCredentials;
-					user = new User(userId, usernameHash, passwordHash);
 				} else {
 					result = invalidLocalCredentials;
 				}
@@ -213,8 +226,9 @@ public class LoginActivity extends Activity {
 			progressDialog.dismiss();
 			if (this.result == validLocalCredentials) {
 				Intent intent = new Intent(context, EventsActivity.class);
-
-				app.setUser(user);
+				intent.putExtra("username", username);
+				intent.putExtra("password", password);
+				intent.putExtra("userId", userId);
 
 				startActivity(intent);
 
@@ -231,13 +245,14 @@ public class LoginActivity extends Activity {
 			}
 		}
 
-		public void setOfflineLoginHelper(OfflineLoginHelper olHelper) {
-			this.olHelper = olHelper;
+		public void setOfflineLoginHelper(OfflineLoginHelper offlineLoginHelper) {
+			this.offlineLoginHelper = offlineLoginHelper;
 		}
 
 		public void setListener(TaskListener listener) {
 			this.listener = listener;
 		}
+
 	}
 
 	public class OnlineLoginTask extends AsyncTask<String, Void, Void> {
@@ -296,13 +311,9 @@ public class LoginActivity extends Activity {
 					usernameHash = BCrypt.hashpw(username, salt);
 					passwordHash = BCrypt.hashpw(password, salt);
 
-					user = new User(userId, username, password);
-					// usernameHash = "asdasd";
-					// passwordHash = "asdasd";
 					response = ApiResponse.OK;
 				}
 			}
-
 		}
 
 		@Override
@@ -311,8 +322,11 @@ public class LoginActivity extends Activity {
 
 			if (response == ApiResponse.OK) {
 				Intent intent = new Intent(context, EventsActivity.class);
-
-				String writeString = user.getUserId() + " " + usernameHash
+				intent.putExtra("username", username);
+				intent.putExtra("password", password);
+				intent.putExtra("userId", userId);
+				
+				String writeString = userId + " " + usernameHash
 						+ " " + passwordHash;
 				FileOutputStream userFileStream;
 
@@ -325,7 +339,6 @@ public class LoginActivity extends Activity {
 					e.printStackTrace();
 				}
 
-				app.setUser(user);
 
 				startActivity(intent);
 			} else if (response == ApiResponse.INVALID_LOGIN) {

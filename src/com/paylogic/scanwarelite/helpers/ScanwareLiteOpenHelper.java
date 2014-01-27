@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
@@ -14,10 +15,11 @@ import com.paylogic.scanwarelite.utils.FileUtils;
 
 public class ScanwareLiteOpenHelper extends SQLiteOpenHelper {
 
-	public static final String DATABASE_NAME = "event.spq";
 	public static final String DATABASE_PATH = "/data/data/com.paylogic.scanwarelite/databases/";
-	public static final String DATABASE_FILEPATH = DATABASE_PATH
-			+ DATABASE_NAME;
+
+	public static final String DATABASE_NAME = "event.spq";
+
+	public final String DATABASE_FILEPATH = DATABASE_PATH + DATABASE_NAME;
 	public static final int DATABASE_VERSION = 1;
 
 	public static final String EVENTS_TABLE = "module";
@@ -32,7 +34,6 @@ public class ScanwareLiteOpenHelper extends SQLiteOpenHelper {
 	public static final String PRODUCTS_KEY_TITLE = "title";
 	public static final String PRODUCTS_KEY_ALLOWED = "allowed";
 
-
 	public static final String BARCODES_KEY_CODE = "code";
 	public static final String BARCODES_KEY_NAME = "name";
 	public static final String BARCODES_KEY_PAYSTATUS = "payStatus";
@@ -44,9 +45,9 @@ public class ScanwareLiteOpenHelper extends SQLiteOpenHelper {
 	public static final String USER_KEY_ID = "id";
 	public static final String USER_KEY_SUPERUSER = "superUser";
 	public static final String USER_KEY_SCANNER = "scanner";
-	
+
 	private Context context;
-	
+
 	public ScanwareLiteOpenHelper(Context context, String name,
 			CursorFactory factory, int version) {
 		super(context, name, factory, version);
@@ -62,11 +63,11 @@ public class ScanwareLiteOpenHelper extends SQLiteOpenHelper {
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 
 	}
-	
-	public boolean databaseExists() {
-		return context.getDatabasePath(ScanwareLiteOpenHelper.DATABASE_NAME).exists();
-	}
 
+	public boolean databaseExists() {
+		return context.getDatabasePath(ScanwareLiteOpenHelper.DATABASE_NAME)
+				.exists();
+	}
 
 	public boolean importDatabase(String dbFilePath) throws IOException {
 
@@ -93,4 +94,23 @@ public class ScanwareLiteOpenHelper extends SQLiteOpenHelper {
 		}
 		return false;
 	}
+
+	public boolean importDatabaseFromAsset(FileInputStream dbInputStream)
+			throws IOException {
+		close();
+		
+		if (dbInputStream != null) {
+			File dbPath = new File(DATABASE_PATH);
+			if (!dbPath.exists()) {
+				dbPath.mkdir();
+			}
+
+			FileUtils.copyFile(dbInputStream,
+					new FileOutputStream(dbPath));
+			getWritableDatabase().close();
+			return true;
+		}
+		return false;
+	}
+
 }

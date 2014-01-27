@@ -6,13 +6,8 @@ import com.paylogic.scanwarelite.models.User;
 
 public class ScanwareLiteApplication extends Application {
 
-	private User user;
 	private boolean encrypted;
 	private boolean running;
-	
-	public User getUser() {
-		return user;
-	}
 
 	public boolean isEncrypted() {
 		return encrypted;
@@ -29,11 +24,5 @@ public class ScanwareLiteApplication extends Application {
 	public void setRunning(boolean running) {
 		this.running = running;
 	}
-
-	public void setUser(User user) {
-		this.user = user;
-	}
-
-	
 
 }

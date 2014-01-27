@@ -4,23 +4,26 @@ import android.content.Context;
 import android.content.DialogInterface;
 
 import com.paylogic.scanwarelite.R;
-import com.paylogic.scanwarelite.ScanwareLiteApplication;
 import com.paylogic.scanwarelite.activities.EventsActivity;
 import com.paylogic.scanwarelite.activities.EventsActivity.DownloadSpqTask;
 import com.paylogic.scanwarelite.dialogs.CommonAlertDialog;
 import com.paylogic.scanwarelite.models.Event;
 import com.paylogic.scanwarelite.models.User;
+import com.paylogic.scanwarelite.models.User.UserNotFoundException;
 
 public class DownloadDialog extends CommonAlertDialog {
 	private EventsActivity eventsActivity;
-	private ScanwareLiteApplication app;
 	private User user;
+	
 	public DownloadDialog(final Context context, final Event event) {
 		super(context);
 		setCanceledOnTouchOutside(false);
 		eventsActivity = (EventsActivity) context;
-		app = (ScanwareLiteApplication) eventsActivity.getApplication();
-		user= app.getUser();
+		try {
+			user= User.getInstance();
+		} catch (UserNotFoundException e) {
+			e.printStackTrace();
+		}
 		
 		setTitle(context.getString(R.string.dialog_title_confirm_download));
 		setMessage(String.format(context.getString(R.string.dialog_msg_confirm_download), event.getName()));

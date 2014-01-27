@@ -52,8 +52,6 @@ public class ProductsActivity extends CommonActivity {
 				ProductsActivity.this, ScanwareLiteOpenHelper.DATABASE_NAME,
 				null, ScanwareLiteOpenHelper.DATABASE_VERSION);
 
-
-
 		products_adapter = new ProductsAdapter(ProductsActivity.this,
 				android.R.layout.simple_list_item_1, products);
 		productsView.setAdapter(products_adapter);

@@ -72,6 +72,12 @@ public class CommonActivity extends Activity {
 //            Toast.makeText(this, "Encrypt", Toast.LENGTH_SHORT).show();
             app.setEncrypted(true);
         }
+		if (progressDialog != null) {
+			progressDialog.dismiss();
+		}
+		if (alertDialog != null) {
+			alertDialog.dismiss();
+		}
     }
 
     protected void onDestroy() {
@@ -109,8 +115,8 @@ public class CommonActivity extends Activity {
     	this.apiFacade = apiFacade;
     }
     
-    public void setScanwareLiteOpenHelper(ScanwareLiteOpenHelper scanwareliteOpenHelper){
-    	this.scanwareLiteOpenHelper = scanwareliteOpenHelper;
+    public void setScanwareLiteOpenHelper(ScanwareLiteOpenHelper scanwareLiteOpenHelper){
+    	this.scanwareLiteOpenHelper = scanwareLiteOpenHelper;
     }
     
     public void dismissDialog(){
