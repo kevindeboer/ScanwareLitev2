@@ -1,7 +1,29 @@
 package com.paylogic.scanwarelite.helpers;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+
 public class PreferenceHelper {
-	public static final String PREFS_FILE = "ScanwareLitePrefs";
 	
-	public static final String KEY_SHOW_ALL = "showAll";
+	private SharedPreferences settings;
+	private SharedPreferences.Editor editor;
+	
+	private final String prefsFile = "ScanwareLitePrefs";
+	
+	private final String keyShowAllEvents = "showAll";
+	
+	public PreferenceHelper(Context context){
+		settings = context.getSharedPreferences(prefsFile,
+				Context.MODE_PRIVATE);
+	}
+	
+	public boolean showAllEvents(){
+		return settings.getBoolean(keyShowAllEvents, false);
+	}
+	
+	public void setShowAllEvents(boolean showAllEvents){
+		editor = settings.edit();
+		editor.putBoolean(keyShowAllEvents, showAllEvents);
+		editor.commit();
+	}
 }

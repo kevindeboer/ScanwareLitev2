@@ -7,6 +7,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -16,13 +17,9 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import android.app.AlertDialog;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.graphics.Color;
 import android.os.AsyncTask;
@@ -46,6 +43,7 @@ import android.widget.Toast;
 
 import com.paylogic.scanwarelite.APIFacade;
 import com.paylogic.scanwarelite.R;
+import com.paylogic.scanwarelite.TaskListener;
 import com.paylogic.scanwarelite.dialogs.events.DownloadDialog;
 import com.paylogic.scanwarelite.dialogs.events.DownloadSpqDialog;
 import com.paylogic.scanwarelite.dialogs.events.Error500Dialog;
@@ -55,9 +53,7 @@ import com.paylogic.scanwarelite.dialogs.events.NoResourcesDialog;
 import com.paylogic.scanwarelite.dialogs.events.OnlyReuseDialog;
 import com.paylogic.scanwarelite.dialogs.events.OverwriteDialog;
 import com.paylogic.scanwarelite.dialogs.events.ReuseOrOverwriteDialog;
-import com.paylogic.scanwarelite.helpers.ConnectivityHelper;
-import com.paylogic.scanwarelite.helpers.PreferenceHelper;
-import com.paylogic.scanwarelite.helpers.ScanwareLiteOpenHelper;
+import com.paylogic.scanwarelite.helpers.DatabaseHelper;
 import com.paylogic.scanwarelite.models.Event;
 import com.paylogic.scanwarelite.models.User;
 import com.paylogic.scanwarelite.utils.FileUtils;
@@ -71,43 +67,38 @@ public class EventsActivity extends CommonActivity {
 	private EventsAdapter eventsAdapter;
 	private Event selectedEvent;
 
-	private GetEventsTask eventsTask;
-	private SharedPreferences settings;
-	private SharedPreferences.Editor editor;
-	
 	private String username;
 	private String password;
 	private int userId;
-	
+
 	private User user;
 	private ArrayList<Event> events;
+	private GetEventsTask getEventsTask;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_events);
 
-		setConnectivityHelper(new ConnectivityHelper(EventsActivity.this));
-		setAPIFacade(new APIFacade());
-		settings = getSharedPreferences(PreferenceHelper.PREFS_FILE,
-				Context.MODE_PRIVATE);
 		events = new ArrayList<Event>();
-		
+
 		Intent intent = getIntent();
-		
+
 		username = intent.getStringExtra("username");
 		password = intent.getStringExtra("password");
 		userId = intent.getIntExtra("userId", -1);
-		
+
 		user = User.createInstance(userId, username, password);
-		
+
 		eventsView = (ListView) findViewById(R.id.listView_events);
 		refreshButton = (Button) findViewById(R.id.button_refresh);
 		continueButton = (Button) findViewById(R.id.button_event_continue);
-		
+
 		eventsAdapter = new EventsAdapter(EventsActivity.this,
 				android.R.layout.simple_list_item_1, events);
 		eventsView.setAdapter(eventsAdapter);
+
+		getEventsTask = new GetEventsTask();
 
 		updateEvents();
 	}
@@ -156,7 +147,7 @@ public class EventsActivity extends CommonActivity {
 							alertDialog.show();
 
 						}
-					} else if (scanwareLiteOpenHelper.databaseExists()) {
+					} else if (databaseHelper.databaseExists()) {
 						alertDialog = new OverwriteDialog(EventsActivity.this,
 								selectedEvent);
 						alertDialog.show();
@@ -170,10 +161,8 @@ public class EventsActivity extends CommonActivity {
 							R.string.toast_select_event, Toast.LENGTH_SHORT)
 							.show();
 				}
-
 			}
 		});
-
 	}
 
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -186,7 +175,7 @@ public class EventsActivity extends CommonActivity {
 	@Override
 	public boolean onPrepareOptionsMenu(Menu menu) {
 		MenuItem toggleEventsMenuItem = menu.findItem(R.id.menu_toggle_events);
-		if (settings.getBoolean("showAll", false)) {
+		if (preferenceHelper.showAllEvents()) {
 			toggleEventsMenuItem
 					.setTitle(getString(R.string.menu_item_show_active_events));
 		} else {
@@ -205,13 +194,11 @@ public class EventsActivity extends CommonActivity {
 			startActivity(intent);
 			break;
 		case R.id.menu_toggle_events:
-			editor = settings.edit();
-			if (settings.getBoolean("showAll", false)) {
-				editor.putBoolean(PreferenceHelper.KEY_SHOW_ALL, false);
+			if (preferenceHelper.showAllEvents()) {
+				preferenceHelper.setShowAllEvents(false);
 			} else {
-				editor.putBoolean(PreferenceHelper.KEY_SHOW_ALL, true);
+				preferenceHelper.setShowAllEvents(true);
 			}
-			editor.commit();
 			updateEvents();
 			break;
 		}
@@ -224,10 +211,8 @@ public class EventsActivity extends CommonActivity {
 	}
 
 	private void updateEvents() {
-
-		eventsTask = new GetEventsTask(settings.getBoolean(
-				PreferenceHelper.KEY_SHOW_ALL, false));
-		eventsTask.execute();
+		getEventsTask.execute();
+		getEventsTask = new GetEventsTask();
 		eventsAdapter.setSelectedIndex(-1);
 		selectedEvent = null;
 
@@ -251,23 +236,25 @@ public class EventsActivity extends CommonActivity {
 			return events;
 		}
 
-		public void setLocalEvent(Event localEvent) {
-			localEvent.setName(localEvent.getName() + "*");
-			events.add(localEvent);
-			this.localEvent = localEvent;
+		public void setLocalEvent(Event event) {
+			event.setName(event.getName() + "*");
+			events.add(event);
+			localEvent = event;
+		}
+		
+		public Event getLocalEvent() {
+			return localEvent;
 		}
 
 		public void addEvent(Event event) {
-			if ((localEvent != null) && (event.getId() == localEvent.getId())) {
+			if (event.isLocalEvent()) {
+				setLocalEvent(event);
+			} else if ((localEvent != null) && (event.getId() == localEvent.getId())) {
 				localEvent.setDeadline(event.getDeadline());
 				localEvent.setEndDate(event.getEndDate());
 			} else {
 				events.add(event);
 			}
-		}
-
-		public Event getLocalEvent() {
-			return localEvent;
 		}
 
 		@Override
@@ -299,6 +286,7 @@ public class EventsActivity extends CommonActivity {
 			} else {
 				v.setBackgroundColor(Color.TRANSPARENT);
 			}
+			
 			if (event != null) {
 
 				eventNameView.setText(eventName);
@@ -321,6 +309,14 @@ public class EventsActivity extends CommonActivity {
 
 	}
 
+	public void setGetEventsTask(GetEventsTask getEventsTask) {
+		this.getEventsTask = getEventsTask;
+	}
+	
+	public void setUser(int id, String username, String password){
+		user = User.createInstance(id, username, password);
+	}
+
 	public class DownloadSpqTask extends AsyncTask<Void, Integer, Void> {
 		private String url = "https://api.paylogic.nl/API/?command=";
 		private String fileName = "event.spq";
@@ -331,7 +327,7 @@ public class EventsActivity extends CommonActivity {
 
 		private boolean error = false;
 		private int errorCode = -1;
-		private static final int NOT_ENOUGH_DISK_SPACE = -1;
+		private final int notEnoughDiskSpace = -1;
 
 		public DownloadSpqTask(String username, String password, Event event) {
 			this.username = username;
@@ -344,7 +340,7 @@ public class EventsActivity extends CommonActivity {
 			progressDialog = new DownloadSpqDialog(EventsActivity.this);
 			progressDialog.show();
 
-			deleteDatabase(ScanwareLiteOpenHelper.DATABASE_NAME);
+			deleteDatabase(DatabaseHelper.DATABASE_NAME);
 		}
 
 		@Override
@@ -359,7 +355,7 @@ public class EventsActivity extends CommonActivity {
 					alertDialog = new Error500Dialog(EventsActivity.this);
 
 					alertDialog.show();
-				} else if (errorCode == NOT_ENOUGH_DISK_SPACE) {
+				} else if (errorCode == notEnoughDiskSpace) {
 					alertDialog = new InsufficientStorageDialog(
 							EventsActivity.this);
 					alertDialog.show();
@@ -393,7 +389,7 @@ public class EventsActivity extends CommonActivity {
 					if (downloaded) {
 						String filePath = getFilesDir().getPath() + "/"
 								+ fileName;
-						scanwareLiteOpenHelper.importDatabase(filePath);
+						databaseHelper.importDatabase(filePath);
 						deleteFile(fileName);
 					}
 
@@ -427,9 +423,9 @@ public class EventsActivity extends CommonActivity {
 			} else if (values[0] == HttpURLConnection.HTTP_INTERNAL_ERROR) {
 				error = true;
 				errorCode = HttpURLConnection.HTTP_INTERNAL_ERROR;
-			} else if (values[0] == NOT_ENOUGH_DISK_SPACE) {
+			} else if (values[0] == notEnoughDiskSpace) {
 				error = true;
-				errorCode = NOT_ENOUGH_DISK_SPACE;
+				errorCode = notEnoughDiskSpace;
 			} else {
 				progressDialog.setProgress(values[0]);
 			}
@@ -457,22 +453,26 @@ public class EventsActivity extends CommonActivity {
 				}
 				return true;
 			} else {
-				publishProgress(NOT_ENOUGH_DISK_SPACE);
+				publishProgress(notEnoughDiskSpace);
 				return false;
 			}
 		}
 
 	}
 
-	public class GetEventsTask extends AsyncTask<Void, Void, Void> {
+	public class GetEventsTask extends AsyncTask<Void, Event, Void> {
 		boolean databaseExists;
 		boolean isConnected;
 		boolean noResources;
 
 		private boolean showAllEvents;
+		private APIFacade apiFacade;
+		
+		// Used for tests
+		private TaskListener listener;
 
-		public GetEventsTask(boolean showAllEvents) {
-			this.showAllEvents = showAllEvents;
+		public GetEventsTask() {
+			this.apiFacade = new APIFacade();
 		}
 
 		@Override
@@ -482,8 +482,9 @@ public class EventsActivity extends CommonActivity {
 
 			eventsAdapter.clear();
 			eventsAdapter.notifyDataSetChanged();
-
-			databaseExists = scanwareLiteOpenHelper.databaseExists();
+			
+			showAllEvents = preferenceHelper.showAllEvents();
+			databaseExists = databaseHelper.databaseExists();
 			isConnected = connHelper.isConnected();
 		}
 
@@ -511,40 +512,40 @@ public class EventsActivity extends CommonActivity {
 		}
 
 		private void getLocalEvent() {
-			db = scanwareLiteOpenHelper.getReadableDatabase();
-			String[] columns = new String[] { ScanwareLiteOpenHelper.USER_KEY_ID };
-			Cursor cursor = db.query(ScanwareLiteOpenHelper.USER_TABLE,
-					columns, null, null, null, null, null, "1");
+			db = databaseHelper.getReadableDatabase();
+			System.out.println();
+			String[] columns = new String[] { DatabaseHelper.USER_KEY_ID };
+			Cursor cursor = db.query(DatabaseHelper.USER_TABLE, columns, null,
+					null, null, null, null, "1");
 
 			int dbUserId = 0;
 			if (cursor != null && cursor.moveToFirst()) {
 				dbUserId = cursor.getInt(cursor
-						.getColumnIndex(ScanwareLiteOpenHelper.USER_KEY_ID));
+						.getColumnIndex(DatabaseHelper.USER_KEY_ID));
 			}
 
 			if (dbUserId == user.getUserId()) {
-				columns = new String[] { ScanwareLiteOpenHelper.EVENT_KEY_ID,
-						ScanwareLiteOpenHelper.EVENT_KEY_TITLE };
+				columns = new String[] { DatabaseHelper.EVENT_KEY_ID,
+						DatabaseHelper.EVENT_KEY_TITLE };
 
-				cursor = db.query(ScanwareLiteOpenHelper.EVENTS_TABLE, columns,
-						null, null, null, null, null, "1");
+				cursor = db.query(DatabaseHelper.EVENTS_TABLE, columns, null,
+						null, null, null, null, "1");
 				if (cursor != null && cursor.moveToFirst()) {
-					int eventId = cursor
-							.getInt(cursor
-									.getColumnIndex(ScanwareLiteOpenHelper.EVENT_KEY_ID));
-					String eventTitle = cursor
-							.getString(cursor
-									.getColumnIndex(ScanwareLiteOpenHelper.EVENT_KEY_TITLE));
-					Event localEvent = new Event(eventId, eventTitle, null,
-							null);
-					eventsAdapter.setLocalEvent(localEvent);
-					publishProgress();
+					int eventId = cursor.getInt(cursor
+							.getColumnIndex(DatabaseHelper.EVENT_KEY_ID));
+					String eventTitle = cursor.getString(cursor
+							.getColumnIndex(DatabaseHelper.EVENT_KEY_TITLE));
+					Event event = new Event(eventId, eventTitle, null, null);
+					event.setLocalEvent(true);
+
+					publishProgress(event);
 				}
 			}
 		}
 
 		private void getOnlineEvents() {
-			Document response = apiFacade.getEvents(user);
+			Document response = apiFacade.getEvents(user.getUsername(),
+					user.getPassword());
 
 			Element root = response.getDocumentElement();
 			NodeList modules = root.getElementsByTagName("module");
@@ -559,21 +560,28 @@ public class EventsActivity extends CommonActivity {
 					String title = element.getTextContent();
 					String endDate = element.getAttribute("enddate");
 					String deadline = element.getAttribute("deadline");
-
-					Event event = new Event(id, title, endDate, deadline);
+					
+					DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+					
+					Event event = null;
+					try {
+						event = new Event(id, title, df.parse(endDate), df.parse(deadline));
+					} catch (ParseException e) {
+						e.printStackTrace();
+					}
 
 					Date now = new Date();
 
 					if (event.getEndDate().after(now) || showAllEvents) {
-						eventsAdapter.addEvent(event);
-						publishProgress();
+						publishProgress(event);
 					}
 				}
 			}
 		}
 
 		@Override
-		protected void onProgressUpdate(Void... args) {
+		protected void onProgressUpdate(Event... events) {
+			eventsAdapter.addEvent(events[0]);
 			eventsAdapter.notifyDataSetChanged();
 		}
 
@@ -585,6 +593,18 @@ public class EventsActivity extends CommonActivity {
 				alertDialog = new NoResourcesDialog(EventsActivity.this);
 				alertDialog.show();
 			}
+
+			if (listener != null) {
+				listener.executionDone();
+			}
+		}
+
+		public void setListener(TaskListener listener) {
+			this.listener = listener;
+		}
+
+		public void setAPIFacade(APIFacade apiFacade) {
+			this.apiFacade = apiFacade;
 		}
 	}
 }

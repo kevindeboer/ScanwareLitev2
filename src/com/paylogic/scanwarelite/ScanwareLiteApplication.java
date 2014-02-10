@@ -2,8 +2,6 @@ package com.paylogic.scanwarelite;
 
 import android.app.Application;
 
-import com.paylogic.scanwarelite.models.User;
-
 public class ScanwareLiteApplication extends Application {
 
 	private boolean encrypted;
@@ -24,5 +22,4 @@ public class ScanwareLiteApplication extends Application {
 	public void setRunning(boolean running) {
 		this.running = running;
 	}
-
 }

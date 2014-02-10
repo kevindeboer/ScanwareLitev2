@@ -25,7 +25,7 @@ import android.widget.TextView;
 
 import com.paylogic.scanwarelite.R;
 import com.paylogic.scanwarelite.dialogs.products.GetProductsDialog;
-import com.paylogic.scanwarelite.helpers.ScanwareLiteOpenHelper;
+import com.paylogic.scanwarelite.helpers.DatabaseHelper;
 import com.paylogic.scanwarelite.models.Product;
 
 public class ProductsActivity extends CommonActivity {
@@ -48,9 +48,9 @@ public class ProductsActivity extends CommonActivity {
 		productsView = (ListView) findViewById(R.id.listView_products);
 		continueButton = (Button) findViewById(R.id.button_products_continue);
 		eventNameView = (TextView) findViewById(R.id.textView_event_name);
-		scanwareLiteOpenHelper = new ScanwareLiteOpenHelper(
-				ProductsActivity.this, ScanwareLiteOpenHelper.DATABASE_NAME,
-				null, ScanwareLiteOpenHelper.DATABASE_VERSION);
+		databaseHelper = new DatabaseHelper(
+				ProductsActivity.this, DatabaseHelper.DATABASE_NAME,
+				null, DatabaseHelper.DATABASE_VERSION);
 
 		products_adapter = new ProductsAdapter(ProductsActivity.this,
 				android.R.layout.simple_list_item_1, products);
@@ -119,33 +119,33 @@ public class ProductsActivity extends CommonActivity {
 			Product product = products.get(position);
 			ContentValues updatedValues = new ContentValues();
 
-			db = scanwareLiteOpenHelper.getWritableDatabase();
+			db = databaseHelper.getWritableDatabase();
 
 			if (product.isAllowed()) {
 				product.setAllowed(false);
 
-				updatedValues.put(ScanwareLiteOpenHelper.PRODUCTS_KEY_ALLOWED,
+				updatedValues.put(DatabaseHelper.PRODUCTS_KEY_ALLOWED,
 						product.isAllowed());
 
-				String whereClause = ScanwareLiteOpenHelper.PRODUCTS_KEY_ID
+				String whereClause = DatabaseHelper.PRODUCTS_KEY_ID
 						+ "= ?";
 				String[] whereArgs = new String[] { Integer
 						.toString(product.getId()) };
 
-				db.update(ScanwareLiteOpenHelper.PRODUCTS_TABLE, updatedValues,
+				db.update(DatabaseHelper.PRODUCTS_TABLE, updatedValues,
 						whereClause, whereArgs);
 			} else {
 				product.setAllowed(true);
 
-				updatedValues.put(ScanwareLiteOpenHelper.PRODUCTS_KEY_ALLOWED,
+				updatedValues.put(DatabaseHelper.PRODUCTS_KEY_ALLOWED,
 						product.isAllowed());
 
-				String whereClause = ScanwareLiteOpenHelper.PRODUCTS_KEY_ID
+				String whereClause = DatabaseHelper.PRODUCTS_KEY_ID
 						+ "= ?";
 				String[] whereArgs = new String[] { Integer
 						.toString(product.getId()) };
 
-				db.update(ScanwareLiteOpenHelper.PRODUCTS_TABLE, updatedValues,
+				db.update(DatabaseHelper.PRODUCTS_TABLE, updatedValues,
 						whereClause, whereArgs);
 			}
 			notifyDataSetChanged();
@@ -160,9 +160,9 @@ public class ProductsActivity extends CommonActivity {
 			
 			ContentValues updatedValues = new ContentValues();
 			updatedValues
-					.put(ScanwareLiteOpenHelper.PRODUCTS_KEY_ALLOWED, true);
+					.put(DatabaseHelper.PRODUCTS_KEY_ALLOWED, true);
 
-			db.update(ScanwareLiteOpenHelper.PRODUCTS_TABLE, updatedValues,
+			db.update(DatabaseHelper.PRODUCTS_TABLE, updatedValues,
 					null, null);
 
 			notifyDataSetChanged();
@@ -176,10 +176,10 @@ public class ProductsActivity extends CommonActivity {
 			}
 			
 			ContentValues updatedValues = new ContentValues();
-			updatedValues.put(ScanwareLiteOpenHelper.PRODUCTS_KEY_ALLOWED,
+			updatedValues.put(DatabaseHelper.PRODUCTS_KEY_ALLOWED,
 					false);
 
-			db.update(ScanwareLiteOpenHelper.PRODUCTS_TABLE, updatedValues,
+			db.update(DatabaseHelper.PRODUCTS_TABLE, updatedValues,
 					null, null);
 
 			notifyDataSetChanged();
@@ -220,7 +220,7 @@ public class ProductsActivity extends CommonActivity {
 			products.clear();
 			products_adapter.notifyDataSetChanged();
 
-			db = scanwareLiteOpenHelper.getReadableDatabase();
+			db = databaseHelper.getReadableDatabase();
 		}
 
 		@Override
@@ -233,32 +233,32 @@ public class ProductsActivity extends CommonActivity {
 		@Override
 		protected Void doInBackground(Void... params) {
 			String[] columns = new String[] {
-					ScanwareLiteOpenHelper.PRODUCTS_KEY_ID,
-					ScanwareLiteOpenHelper.PRODUCTS_KEY_TITLE,
-					ScanwareLiteOpenHelper.PRODUCTS_KEY_ALLOWED };
-			Cursor cursor = db.query(ScanwareLiteOpenHelper.PRODUCTS_TABLE,
+					DatabaseHelper.PRODUCTS_KEY_ID,
+					DatabaseHelper.PRODUCTS_KEY_TITLE,
+					DatabaseHelper.PRODUCTS_KEY_ALLOWED };
+			Cursor cursor = db.query(DatabaseHelper.PRODUCTS_TABLE,
 					columns, null, null, null, null, null);
 			while (cursor.moveToNext()) {
 				int id = cursor
 						.getInt(cursor
-								.getColumnIndex(ScanwareLiteOpenHelper.PRODUCTS_KEY_ID));
+								.getColumnIndex(DatabaseHelper.PRODUCTS_KEY_ID));
 				String title = cursor
 						.getString(cursor
-								.getColumnIndex(ScanwareLiteOpenHelper.PRODUCTS_KEY_TITLE));
+								.getColumnIndex(DatabaseHelper.PRODUCTS_KEY_TITLE));
 				boolean allowed = cursor
 						.getInt(cursor
-								.getColumnIndex(ScanwareLiteOpenHelper.PRODUCTS_KEY_ALLOWED)) > 0;
+								.getColumnIndex(DatabaseHelper.PRODUCTS_KEY_ALLOWED)) > 0;
 				Product product = new Product(id, title, allowed);
 				publishProgress(product);
 			}
 
-			columns = new String[] { ScanwareLiteOpenHelper.EVENT_KEY_TITLE };
-			cursor = db.query(ScanwareLiteOpenHelper.EVENTS_TABLE, columns,
+			columns = new String[] { DatabaseHelper.EVENT_KEY_TITLE };
+			cursor = db.query(DatabaseHelper.EVENTS_TABLE, columns,
 					null, null, null, null, null, "1");
 			cursor.moveToFirst();
 
 			eventName = cursor.getString(cursor
-					.getColumnIndex(ScanwareLiteOpenHelper.EVENT_KEY_TITLE));
+					.getColumnIndex(DatabaseHelper.EVENT_KEY_TITLE));
 
 
 

@@ -15,7 +15,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.paylogic.scanwarelite.R;
-import com.paylogic.scanwarelite.helpers.ScanwareLiteOpenHelper;
+import com.paylogic.scanwarelite.helpers.DatabaseHelper;
 import com.paylogic.scanwarelite.models.Product;
 
 public class StatisticsActivity extends CommonActivity {
@@ -35,7 +35,7 @@ public class StatisticsActivity extends CommonActivity {
 
 	protected void onResume() {
 		super.onResume();
-		db = scanwareLiteOpenHelper.getReadableDatabase();
+		db = databaseHelper.getReadableDatabase();
 		products = getProducts(db);
 		getTotalTicketsForProducts(db);
 		getCheckedInTicketsForProducts(db);
@@ -48,23 +48,23 @@ public class StatisticsActivity extends CommonActivity {
 	private ArrayList<Product> getProducts(SQLiteDatabase db) {
 		ArrayList<Product> products = new ArrayList<Product>();
 		String[] columns = new String[] {
-				ScanwareLiteOpenHelper.PRODUCTS_KEY_ID,
-				ScanwareLiteOpenHelper.PRODUCTS_KEY_TITLE,
-				ScanwareLiteOpenHelper.PRODUCTS_KEY_ALLOWED };
-		String whereClause = ScanwareLiteOpenHelper.PRODUCTS_KEY_ALLOWED
+				DatabaseHelper.PRODUCTS_KEY_ID,
+				DatabaseHelper.PRODUCTS_KEY_TITLE,
+				DatabaseHelper.PRODUCTS_KEY_ALLOWED };
+		String whereClause = DatabaseHelper.PRODUCTS_KEY_ALLOWED
 				+ "= ?";
 		String[] whereArgs = { "1" };
 
-		Cursor cursor = db.query(ScanwareLiteOpenHelper.PRODUCTS_TABLE,
+		Cursor cursor = db.query(DatabaseHelper.PRODUCTS_TABLE,
 				columns, whereClause, whereArgs, null, null, null);
 		while (cursor.moveToNext()) {
 			int id = cursor.getInt(cursor
-					.getColumnIndex(ScanwareLiteOpenHelper.PRODUCTS_KEY_ID));
+					.getColumnIndex(DatabaseHelper.PRODUCTS_KEY_ID));
 			String title = cursor.getString(cursor
-					.getColumnIndex(ScanwareLiteOpenHelper.PRODUCTS_KEY_TITLE));
+					.getColumnIndex(DatabaseHelper.PRODUCTS_KEY_TITLE));
 			boolean allowed = cursor
 					.getInt(cursor
-							.getColumnIndex(ScanwareLiteOpenHelper.PRODUCTS_KEY_ALLOWED)) > 0;
+							.getColumnIndex(DatabaseHelper.PRODUCTS_KEY_ALLOWED)) > 0;
 			if (allowed) {
 				Product product = new Product(id, title, allowed);
 				products.add(product);
@@ -75,12 +75,12 @@ public class StatisticsActivity extends CommonActivity {
 
 	private void getTotalTicketsForProducts(SQLiteDatabase db) {
 		String query = "SELECT "
-				+ ScanwareLiteOpenHelper.BARCODES_KEY_PRODUCTID
-				+ ", COUNT(*) FROM " + ScanwareLiteOpenHelper.BARCODES_TABLE
-				+ " WHERE " + ScanwareLiteOpenHelper.BARCODES_KEY_PAYSTATUS
-				+ "=? OR " + ScanwareLiteOpenHelper.BARCODES_KEY_PAYSTATUS
+				+ DatabaseHelper.BARCODES_KEY_PRODUCTID
+				+ ", COUNT(*) FROM " + DatabaseHelper.BARCODES_TABLE
+				+ " WHERE " + DatabaseHelper.BARCODES_KEY_PAYSTATUS
+				+ "=? OR " + DatabaseHelper.BARCODES_KEY_PAYSTATUS
 				+ "=? GROUP BY "
-				+ ScanwareLiteOpenHelper.BARCODES_KEY_PRODUCTID;
+				+ DatabaseHelper.BARCODES_KEY_PRODUCTID;
 		String[] whereArgs = new String[] { "101" , "102"};
 		Cursor cursor = db.rawQuery(query, whereArgs);
 		while (cursor.moveToNext()) {
@@ -99,13 +99,13 @@ public class StatisticsActivity extends CommonActivity {
 
 	private void getCheckedInTicketsForProducts(SQLiteDatabase db) {
 		String query = "SELECT "
-				+ ScanwareLiteOpenHelper.BARCODES_KEY_PRODUCTID
-				+ ", COUNT(*) FROM " + ScanwareLiteOpenHelper.BARCODES_TABLE
-				+ " WHERE (" + ScanwareLiteOpenHelper.BARCODES_KEY_PAYSTATUS
-				+ "=? OR " + ScanwareLiteOpenHelper.BARCODES_KEY_PAYSTATUS
-				+ "=?) AND " + ScanwareLiteOpenHelper.BARCODES_KEY_SEEN
+				+ DatabaseHelper.BARCODES_KEY_PRODUCTID
+				+ ", COUNT(*) FROM " + DatabaseHelper.BARCODES_TABLE
+				+ " WHERE (" + DatabaseHelper.BARCODES_KEY_PAYSTATUS
+				+ "=? OR " + DatabaseHelper.BARCODES_KEY_PAYSTATUS
+				+ "=?) AND " + DatabaseHelper.BARCODES_KEY_SEEN
 				+ "=? GROUP BY "
-				+ ScanwareLiteOpenHelper.BARCODES_KEY_PRODUCTID;
+				+ DatabaseHelper.BARCODES_KEY_PRODUCTID;
 		String[] whereArgs = new String[] { "101", "102" , "1"};
 		Cursor cursor = db.rawQuery(query, whereArgs);
 		while (cursor.moveToNext()) {

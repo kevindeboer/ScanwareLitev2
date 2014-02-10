@@ -10,6 +10,4 @@ public class ApiResponse {
 	public static int SERVER_ERROR = 10005;
 	public static int NO_SUCH_MODULE = 10006;
 	public static int ACCESS_DENIED = 10007;
-
-	
 }

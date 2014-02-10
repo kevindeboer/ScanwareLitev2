@@ -2,15 +2,12 @@ package com.paylogic.scanwarelite.dialogs.settings;
 
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.SharedPreferences;
 
 import com.paylogic.scanwarelite.R;
-import com.paylogic.scanwarelite.ScanwareLiteApplication;
 import com.paylogic.scanwarelite.activities.CommonActivity;
 import com.paylogic.scanwarelite.dialogs.CommonAlertDialog;
+import com.paylogic.scanwarelite.helpers.DatabaseHelper;
 import com.paylogic.scanwarelite.helpers.OfflineLoginHelper;
-import com.paylogic.scanwarelite.helpers.PreferenceHelper;
-import com.paylogic.scanwarelite.helpers.ScanwareLiteOpenHelper;
 
 public class DeleteDataDialog extends CommonAlertDialog {
 	private CommonActivity commonActivity;
@@ -29,7 +26,7 @@ public class DeleteDataDialog extends CommonAlertDialog {
 					public void onClick(DialogInterface dialog, int id) {
 						olHelper.deleteUserFile();
 						commonActivity
-								.deleteDatabase(ScanwareLiteOpenHelper.DATABASE_NAME);
+								.deleteDatabase(DatabaseHelper.DATABASE_NAME);
 
 						commonActivity.logout();
 					}

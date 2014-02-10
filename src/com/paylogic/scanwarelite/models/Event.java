@@ -11,58 +11,32 @@ public class Event {
 	private String name;
 	private Date endDate;
 	private Date deadline;
-	private boolean onlineEvent;
-
-	public Event(int id, String name, String endDate, String deadline) {
+	private boolean localEvent;
+	
+	public Event(int id, String name, Date endDate, Date deadline) {
 		this.id = id;
 		this.name = name;
-		this.onlineEvent = true;
-		if (endDate != null) {
-			this.endDate = setEndDateByString(endDate);
-		}
-		if (deadline != null) {
-			this.deadline = setDeadlineByString(deadline);
-		}
-
-	}
-
-	private Date setDeadlineByString(String deadline) {
-		DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		try {
-			return df.parse(deadline);
-		} catch (ParseException e) {
-			e.printStackTrace();
-		}
-		return null;
-	}
-
-	private Date setEndDateByString(String endDate) {
-		DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		try {
-			return df.parse(endDate);
-		} catch (ParseException e) {
-			e.printStackTrace();
-		}
-		return null;
+		this.endDate = endDate;
+		this.deadline = deadline;
+		this.localEvent = false;
 	}
 	
-	public void setEndDate(Date endDate){
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public void setEndDate(Date endDate) {
 		this.endDate = endDate;
 	}
-	
-	public void setDeadline(Date deadline){
+
+	public void setDeadline(Date deadline) {
 		this.deadline = deadline;
 	}
-
-
-	public boolean isOnlineEvent() {
-		return onlineEvent;
+	
+	public void setLocalEvent(boolean isLocalEvent) {
+		this.localEvent = isLocalEvent;
 	}
 	
-	public void setOnlineEvent(boolean onlineEvent) {
-		this.onlineEvent = onlineEvent;
-	}
-
 	public int getId() {
 		return id;
 	}
@@ -78,9 +52,10 @@ public class Event {
 	public Date getEndDate() {
 		return endDate;
 	}
-
-	public void setName(String name) {
-		this.name = name;
+	
+	public boolean isLocalEvent() {
+		return localEvent;
 	}
+
 
 }

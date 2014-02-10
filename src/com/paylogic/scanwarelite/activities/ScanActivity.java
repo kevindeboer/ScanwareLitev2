@@ -43,7 +43,7 @@ import com.paylogic.scanwarelite.dialogs.scan.InvalidBarcodeLengthDialog;
 import com.paylogic.scanwarelite.dialogs.scan.ManualInputDialog;
 import com.paylogic.scanwarelite.dialogs.scan.PaymentErrorDialog;
 import com.paylogic.scanwarelite.dialogs.scan.ValidProductDialog;
-import com.paylogic.scanwarelite.helpers.ScanwareLiteOpenHelper;
+import com.paylogic.scanwarelite.helpers.DatabaseHelper;
 import com.paylogic.scanwarelite.views.CameraPreview;
 
 public class ScanActivity extends CommonActivity {
@@ -177,8 +177,7 @@ public class ScanActivity extends CommonActivity {
 
 		case R.id.menu_settings:
 			flashlightEnabled = false;
-			intent = new Intent(ScanActivity.this,
-					SettingsActivity.class);
+			intent = new Intent(ScanActivity.this, SettingsActivity.class);
 			startActivity(intent);
 			break;
 
@@ -202,8 +201,7 @@ public class ScanActivity extends CommonActivity {
 			break;
 
 		case R.id.menu_view_statistics:
-			intent = new Intent(ScanActivity.this,
-					StatisticsActivity.class);
+			intent = new Intent(ScanActivity.this, StatisticsActivity.class);
 			startActivity(intent);
 		}
 
@@ -266,21 +264,21 @@ public class ScanActivity extends CommonActivity {
 			String query = "";
 			Cursor cursor;
 
-			ScanwareLiteOpenHelper scanwareLiteOpenHelper = new ScanwareLiteOpenHelper(
-					ScanActivity.this, ScanwareLiteOpenHelper.DATABASE_NAME,
-					null, ScanwareLiteOpenHelper.DATABASE_VERSION);
+			DatabaseHelper databaseHelper = new DatabaseHelper(
+					ScanActivity.this, DatabaseHelper.DATABASE_NAME,
+					null, DatabaseHelper.DATABASE_VERSION);
 
-			SQLiteDatabase db = scanwareLiteOpenHelper.getWritableDatabase();
+			SQLiteDatabase db = databaseHelper.getWritableDatabase();
 
-			query = "SELECT " + ScanwareLiteOpenHelper.BARCODES_KEY_CODE + ", "
-					+ ScanwareLiteOpenHelper.BARCODES_KEY_NAME + ", "
-					+ ScanwareLiteOpenHelper.BARCODES_KEY_PAYSTATUS + ", "
-					+ ScanwareLiteOpenHelper.BARCODES_KEY_SEEN + ", "
-					+ ScanwareLiteOpenHelper.BARCODES_KEY_SEENDATE + ", "
-					+ ScanwareLiteOpenHelper.PRODUCTS_KEY_ALLOWED + ", "
-					+ ScanwareLiteOpenHelper.PRODUCTS_KEY_TITLE + " FROM "
-					+ ScanwareLiteOpenHelper.BARCODES_TABLE + ", "
-					+ ScanwareLiteOpenHelper.PRODUCTS_TABLE
+			query = "SELECT " + DatabaseHelper.BARCODES_KEY_CODE + ", "
+					+ DatabaseHelper.BARCODES_KEY_NAME + ", "
+					+ DatabaseHelper.BARCODES_KEY_PAYSTATUS + ", "
+					+ DatabaseHelper.BARCODES_KEY_SEEN + ", "
+					+ DatabaseHelper.BARCODES_KEY_SEENDATE + ", "
+					+ DatabaseHelper.PRODUCTS_KEY_ALLOWED + ", "
+					+ DatabaseHelper.PRODUCTS_KEY_TITLE + " FROM "
+					+ DatabaseHelper.BARCODES_TABLE + ", "
+					+ DatabaseHelper.PRODUCTS_TABLE
 					+ " WHERE barcodes.productID = products.id and code = ?";
 			cursor = db.rawQuery(query, new String[] { barcode });
 
@@ -299,7 +297,7 @@ public class ScanActivity extends CommonActivity {
 				cursor.moveToFirst();
 				int payStatus = cursor
 						.getInt(cursor
-								.getColumnIndex(ScanwareLiteOpenHelper.BARCODES_KEY_PAYSTATUS));
+								.getColumnIndex(DatabaseHelper.BARCODES_KEY_PAYSTATUS));
 
 				// TODO: Make this more specific
 				if (payStatus != 101 && payStatus != 102) {
@@ -315,12 +313,12 @@ public class ScanActivity extends CommonActivity {
 
 				boolean seen = cursor
 						.getInt(cursor
-								.getColumnIndex(ScanwareLiteOpenHelper.BARCODES_KEY_SEEN)) > 0;
+								.getColumnIndex(DatabaseHelper.BARCODES_KEY_SEEN)) > 0;
 				if (seen) {
 					// already seen error
 					String seenDate = cursor
 							.getString(cursor
-									.getColumnIndex(ScanwareLiteOpenHelper.BARCODES_KEY_SEENDATE));
+									.getColumnIndex(DatabaseHelper.BARCODES_KEY_SEENDATE));
 
 					alertDialog = new AlreadySeenDialog(ScanActivity.this,
 							barcode, seenDate);
@@ -334,10 +332,10 @@ public class ScanActivity extends CommonActivity {
 
 				boolean allowed = cursor
 						.getInt(cursor
-								.getColumnIndex(ScanwareLiteOpenHelper.PRODUCTS_KEY_ALLOWED)) > 0;
+								.getColumnIndex(DatabaseHelper.PRODUCTS_KEY_ALLOWED)) > 0;
 				String product = cursor
 						.getString(cursor
-								.getColumnIndex(ScanwareLiteOpenHelper.PRODUCTS_KEY_TITLE));
+								.getColumnIndex(DatabaseHelper.PRODUCTS_KEY_TITLE));
 
 				if (!allowed) {
 					// filtered product error
@@ -354,7 +352,7 @@ public class ScanActivity extends CommonActivity {
 					// Ticket OK!
 					String name = cursor
 							.getString(cursor
-									.getColumnIndex(ScanwareLiteOpenHelper.BARCODES_KEY_NAME));
+									.getColumnIndex(DatabaseHelper.BARCODES_KEY_NAME));
 
 					alertDialog = new ValidProductDialog(ScanActivity.this,
 							barcode, product, name);
@@ -370,15 +368,15 @@ public class ScanActivity extends CommonActivity {
 					String timeStamp = df.format(now);
 
 					ContentValues values = new ContentValues();
-					values.put(ScanwareLiteOpenHelper.BARCODES_KEY_SEEN, true);
-					values.put(ScanwareLiteOpenHelper.BARCODES_KEY_SEENDATE,
+					values.put(DatabaseHelper.BARCODES_KEY_SEEN, true);
+					values.put(DatabaseHelper.BARCODES_KEY_SEENDATE,
 							timeStamp);
 
-					String whereClause = ScanwareLiteOpenHelper.BARCODES_KEY_CODE
+					String whereClause = DatabaseHelper.BARCODES_KEY_CODE
 							+ "= ?";
 					String[] whereArgs = { barcode };
 
-					db.update(ScanwareLiteOpenHelper.BARCODES_TABLE, values,
+					db.update(DatabaseHelper.BARCODES_TABLE, values,
 							whereClause, whereArgs);
 
 					return;

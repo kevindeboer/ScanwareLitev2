@@ -13,7 +13,6 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
@@ -24,7 +23,6 @@ import android.widget.EditText;
 import com.paylogic.scanwarelite.APIFacade;
 import com.paylogic.scanwarelite.ApiResponse;
 import com.paylogic.scanwarelite.R;
-import com.paylogic.scanwarelite.ScanwareLiteApplication;
 import com.paylogic.scanwarelite.TaskListener;
 import com.paylogic.scanwarelite.dialogs.UnhandledExceptionDialog;
 import com.paylogic.scanwarelite.dialogs.login.EmptyInputDialog;
@@ -36,7 +34,6 @@ import com.paylogic.scanwarelite.dialogs.login.NoLocalDataDialog;
 import com.paylogic.scanwarelite.helpers.ConnectivityHelper;
 import com.paylogic.scanwarelite.helpers.OfflineLoginHelper;
 import com.paylogic.scanwarelite.helpers.PreferenceHelper;
-import com.paylogic.scanwarelite.models.User;
 import com.paylogic.scanwarelite.security.BCrypt;
 
 public class LoginActivity extends Activity {
@@ -58,10 +55,7 @@ public class LoginActivity extends Activity {
 	private String passwordHash;
 	private String usernameHash;
 
-	private ScanwareLiteApplication app;
-
-	private SharedPreferences settings;
-	private SharedPreferences.Editor editor;
+	private PreferenceHelper preferenceHelper;
 
 	private ConnectivityHelper connHelper;
 
@@ -75,18 +69,12 @@ public class LoginActivity extends Activity {
 		connHelper = new ConnectivityHelper(context);
 		offlineLoginTask = new OfflineLoginTask();
 		onlineLoginTask = new OnlineLoginTask();
+		preferenceHelper = new PreferenceHelper(LoginActivity.this);
+		preferenceHelper.setShowAllEvents(false);
 
-		settings = getSharedPreferences(PreferenceHelper.PREFS_FILE,
-				Context.MODE_PRIVATE);
-
-		app = (ScanwareLiteApplication) ((Activity) context).getApplication();
 		loginButton = (Button) findViewById(R.id.button_login);
 		usernameView = (EditText) findViewById(R.id.editText_username);
 		passwordView = (EditText) findViewById(R.id.editText_password);
-
-		editor = settings.edit();
-		editor.putBoolean(PreferenceHelper.KEY_SHOW_ALL, false);
-		editor.commit();
 
 		if (getIntent().getBooleanExtra("error", false)) {
 			alertDialog = new UnhandledExceptionDialog(context);
@@ -203,7 +191,7 @@ public class LoginActivity extends Activity {
 				String fileContent = offlineLoginHelper.getUserFileContent();
 				String[] contents = fileContent.split(" ");
 
-				int userId = Integer.parseInt(contents[0]);
+				userId = Integer.parseInt(contents[0]);
 				usernameHash = contents[1];
 				passwordHash = contents[2];
 
@@ -303,7 +291,7 @@ public class LoginActivity extends Activity {
 				Node userIdNode = root.getElementsByTagName("userid").item(0);
 				if (userIdNode.getNodeType() == Node.ELEMENT_NODE) {
 					Element userIdElement = (Element) userIdNode;
-					int userId = Integer.parseInt(userIdElement
+					userId = Integer.parseInt(userIdElement
 							.getAttribute("id"));
 
 					String salt = BCrypt.gensalt();

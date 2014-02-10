@@ -60,13 +60,13 @@ public class APIFacade {
 
 	}
 
-	public Document getEvents(User user) {
+	public Document getEvents(String username, String password) {
 		command = "sparqMMList";
-		urlParams = "&username=" + user.getUsername() + "&password="
-				+ user.getPassword();
+		urlParams = "&username=" + username + "&password="
+				+ password;
 		urlString = urlBase + command + urlParams;
-		Document respone  = callAPI(urlString);
-				System.out.println();
-		return respone;
+		System.out.println();
+		Document response  = callAPI(urlString);
+		return response;
 	}
 }
