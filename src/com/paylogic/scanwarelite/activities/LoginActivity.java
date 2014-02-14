@@ -298,7 +298,8 @@ public class LoginActivity extends Activity {
 
 					usernameHash = BCrypt.hashpw(username, salt);
 					passwordHash = BCrypt.hashpw(password, salt);
-
+//					usernameHash = "";
+//					passwordHash = "";
 					response = ApiResponse.OK;
 				}
 			}

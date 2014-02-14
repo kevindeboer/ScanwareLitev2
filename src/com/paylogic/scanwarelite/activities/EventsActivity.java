@@ -1,8 +1,6 @@
 package com.paylogic.scanwarelite.activities;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -123,7 +121,7 @@ public class EventsActivity extends CommonActivity {
 				}
 			}
 		});
-
+       
 		refreshButton.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
 				updateEvents();
@@ -319,7 +317,6 @@ public class EventsActivity extends CommonActivity {
 
 	public class DownloadSpqTask extends AsyncTask<Void, Integer, Void> {
 		private String url = "https://api.paylogic.nl/API/?command=";
-		private String fileName = "event.spq";
 
 		private String username;
 		private String password;
@@ -384,15 +381,14 @@ public class EventsActivity extends CommonActivity {
 						.openConnection();
 				conn.connect();
 				if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
-					boolean downloaded = downloadSpqFile(conn);
-
-					if (downloaded) {
-						String filePath = getFilesDir().getPath() + "/"
-								+ fileName;
-						databaseHelper.importDatabase(filePath);
-						deleteFile(fileName);
+					int fileLength = conn.getContentLength();
+					
+					if(FileUtils.availableDiskSpace() > fileLength){
+						databaseHelper.importDatabase(conn.getInputStream());
+					} else {
+						publishProgress(notEnoughDiskSpace);
 					}
-
+					
 				} else if (conn.getResponseCode() == HttpURLConnection.HTTP_INTERNAL_ERROR) {
 					publishProgress(HttpURLConnection.HTTP_INTERNAL_ERROR);
 				}
@@ -430,34 +426,6 @@ public class EventsActivity extends CommonActivity {
 				progressDialog.setProgress(values[0]);
 			}
 		}
-
-		private boolean downloadSpqFile(HttpURLConnection conn)
-				throws IOException {
-			int fileLength = conn.getContentLength();
-			long availableDiskSpace = FileUtils.availableDiskSpace();
-
-			if (fileLength < availableDiskSpace) {
-				publishProgress(HttpURLConnection.HTTP_OK, fileLength);
-
-				InputStream input = conn.getInputStream();
-				OutputStream output = openFileOutput(fileName,
-						Context.MODE_PRIVATE);
-
-				byte data[] = new byte[4096];
-				long total = 0;
-				int count;
-				while ((count = input.read(data)) != -1) {
-					total += count;
-					publishProgress((int) (total * 100 / fileLength));
-					output.write(data, 0, count);
-				}
-				return true;
-			} else {
-				publishProgress(notEnoughDiskSpace);
-				return false;
-			}
-		}
-
 	}
 
 	public class GetEventsTask extends AsyncTask<Void, Event, Void> {
@@ -513,7 +481,6 @@ public class EventsActivity extends CommonActivity {
 
 		private void getLocalEvent() {
 			db = databaseHelper.getReadableDatabase();
-			System.out.println();
 			String[] columns = new String[] { DatabaseHelper.USER_KEY_ID };
 			Cursor cursor = db.query(DatabaseHelper.USER_TABLE, columns, null,
 					null, null, null, null, "1");

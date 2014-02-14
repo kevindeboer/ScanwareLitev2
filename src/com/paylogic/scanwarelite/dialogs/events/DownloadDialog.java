@@ -11,7 +11,7 @@ import com.paylogic.scanwarelite.models.Event;
 import com.paylogic.scanwarelite.models.User;
 import com.paylogic.scanwarelite.models.User.UserNotFoundException;
 
-public class DownloadDialog extends CommonAlertDialog {
+public class DownloadDialog extends CommonAlertDialog{
 	private EventsActivity eventsActivity;
 	private User user;
 	
@@ -19,6 +19,7 @@ public class DownloadDialog extends CommonAlertDialog {
 		super(context);
 		setCanceledOnTouchOutside(false);
 		eventsActivity = (EventsActivity) context;
+		
 		try {
 			user= User.getInstance();
 		} catch (UserNotFoundException e) {

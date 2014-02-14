@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import com.paylogic.scanwarelite.ExceptionHandler;
 import com.paylogic.scanwarelite.R;
@@ -36,12 +37,12 @@ public class CommonActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		app = (ScanwareLiteApplication) getApplicationContext();
 		resources = getResources();
-		databaseHelper = new DatabaseHelper(
-				CommonActivity.this, DatabaseHelper.DATABASE_NAME,
-				null, DatabaseHelper.DATABASE_VERSION);
+		setDatabaseHelper(new DatabaseHelper(CommonActivity.this,
+				DatabaseHelper.DATABASE_NAME, null,
+				DatabaseHelper.DATABASE_VERSION));
 		setPreferenceHelper(new PreferenceHelper(CommonActivity.this));
 		setConnectivityHelper(new ConnectivityHelper(CommonActivity.this));
-		
+
 		Thread.setDefaultUncaughtExceptionHandler(new ExceptionHandler(
 				CommonActivity.this));
 	}
@@ -58,7 +59,7 @@ public class CommonActivity extends Activity {
 		super.onResume();
 		app.setRunning(true);
 		if (app.isEncrypted()) {
-			// Toast.makeText(this, "Decrypt", Toast.LENGTH_SHORT).show();
+//			Toast.makeText(this, "Decrypt", Toast.LENGTH_SHORT).show();
 			app.setEncrypted(false);
 		}
 	}
@@ -71,7 +72,7 @@ public class CommonActivity extends Activity {
 	protected void onStop() {
 		super.onStop();
 		if (!app.isRunning()) {
-			// Toast.makeText(this, "Encrypt", Toast.LENGTH_SHORT).show();
+//			Toast.makeText(this, "Encrypt", Toast.LENGTH_SHORT).show();
 			app.setEncrypted(true);
 		}
 		if (progressDialog != null) {
@@ -95,7 +96,6 @@ public class CommonActivity extends Activity {
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-
 		switch (item.getItemId()) {
 		case R.id.menu_logout:
 			logout();
@@ -117,15 +117,10 @@ public class CommonActivity extends Activity {
 		this.connHelper = connHelper;
 	}
 
-	public void setDatabaseHelper(
-			DatabaseHelper databaseHelper) {
+	public void setDatabaseHelper(DatabaseHelper databaseHelper) {
 		this.databaseHelper = databaseHelper;
 	}
-
-	public void dismissDialog() {
-		alertDialog.dismiss();
-	}
-
+	
 	public void logout() {
 		Intent intent = new Intent(CommonActivity.this, LoginActivity.class);
 		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
