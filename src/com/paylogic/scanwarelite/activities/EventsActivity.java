@@ -121,7 +121,7 @@ public class EventsActivity extends CommonActivity {
 				}
 			}
 		});
-       
+
 		refreshButton.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
 				updateEvents();
@@ -131,9 +131,11 @@ public class EventsActivity extends CommonActivity {
 		continueButton.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
 				if (selectedEvent != null) {
+					// If selected event == event from database
 					if ((eventsAdapter.getLocalEvent() != null)
 							&& (selectedEvent.getId() == eventsAdapter
 									.getLocalEvent().getId())) {
+						// if not connected
 						if (!connHelper.isConnected()) {
 							alertDialog = new OnlyReuseDialog(
 									EventsActivity.this);
@@ -145,10 +147,12 @@ public class EventsActivity extends CommonActivity {
 							alertDialog.show();
 
 						}
+						// else if database exists
 					} else if (databaseHelper.databaseExists()) {
 						alertDialog = new OverwriteDialog(EventsActivity.this,
 								selectedEvent);
 						alertDialog.show();
+						// else
 					} else {
 						alertDialog = new DownloadDialog(EventsActivity.this,
 								selectedEvent);
@@ -239,7 +243,7 @@ public class EventsActivity extends CommonActivity {
 			events.add(event);
 			localEvent = event;
 		}
-		
+
 		public Event getLocalEvent() {
 			return localEvent;
 		}
@@ -247,7 +251,8 @@ public class EventsActivity extends CommonActivity {
 		public void addEvent(Event event) {
 			if (event.isLocalEvent()) {
 				setLocalEvent(event);
-			} else if ((localEvent != null) && (event.getId() == localEvent.getId())) {
+			} else if ((localEvent != null)
+					&& (event.getId() == localEvent.getId())) {
 				localEvent.setDeadline(event.getDeadline());
 				localEvent.setEndDate(event.getEndDate());
 			} else {
@@ -284,7 +289,7 @@ public class EventsActivity extends CommonActivity {
 			} else {
 				v.setBackgroundColor(Color.TRANSPARENT);
 			}
-			
+
 			if (event != null) {
 
 				eventNameView.setText(eventName);
@@ -310,8 +315,8 @@ public class EventsActivity extends CommonActivity {
 	public void setGetEventsTask(GetEventsTask getEventsTask) {
 		this.getEventsTask = getEventsTask;
 	}
-	
-	public void setUser(int id, String username, String password){
+
+	public void setUser(int id, String username, String password) {
 		user = User.createInstance(id, username, password);
 	}
 
@@ -382,13 +387,13 @@ public class EventsActivity extends CommonActivity {
 				conn.connect();
 				if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
 					int fileLength = conn.getContentLength();
-					
-					if(FileUtils.availableDiskSpace() > fileLength){
+
+					if (FileUtils.availableDiskSpace() > fileLength) {
 						databaseHelper.importDatabase(conn.getInputStream());
 					} else {
 						publishProgress(notEnoughDiskSpace);
 					}
-					
+
 				} else if (conn.getResponseCode() == HttpURLConnection.HTTP_INTERNAL_ERROR) {
 					publishProgress(HttpURLConnection.HTTP_INTERNAL_ERROR);
 				}
@@ -435,7 +440,7 @@ public class EventsActivity extends CommonActivity {
 
 		private boolean showAllEvents;
 		private APIFacade apiFacade;
-		
+
 		// Used for tests
 		private TaskListener listener;
 
@@ -450,7 +455,7 @@ public class EventsActivity extends CommonActivity {
 
 			eventsAdapter.clear();
 			eventsAdapter.notifyDataSetChanged();
-			
+
 			showAllEvents = preferenceHelper.showAllEvents();
 			databaseExists = databaseHelper.databaseExists();
 			isConnected = connHelper.isConnected();
@@ -462,10 +467,13 @@ public class EventsActivity extends CommonActivity {
 
 				// Get event from database
 				if (databaseExists) {
+
+					// Workaround try/catch for corrupted database when force
+					// quitting when downloading
 					try {
 						getLocalEvent();
 					} catch (SQLiteException e) {
-
+						e.printStackTrace();
 					}
 				}
 
@@ -527,12 +535,13 @@ public class EventsActivity extends CommonActivity {
 					String title = element.getTextContent();
 					String endDate = element.getAttribute("enddate");
 					String deadline = element.getAttribute("deadline");
-					
+
 					DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-					
+
 					Event event = null;
 					try {
-						event = new Event(id, title, df.parse(endDate), df.parse(deadline));
+						event = new Event(id, title, df.parse(endDate),
+								df.parse(deadline));
 					} catch (ParseException e) {
 						e.printStackTrace();
 					}
