@@ -9,6 +9,7 @@ import android.widget.TextView;
 
 import com.paylogic.scanwarelite.R;
 import com.paylogic.scanwarelite.activities.ScanActivity;
+import com.paylogic.scanwarelite.models.Barcode;
 
 public class ScanAlertDialog extends AlertDialog {
 	private ScanActivity scanActivity;
@@ -20,8 +21,8 @@ public class ScanAlertDialog extends AlertDialog {
 	private View scanDialogView;
 
 	private Resources resources;
-	
-	public ScanAlertDialog(Context context, String barcode, int colorId,
+
+	public ScanAlertDialog(Context context, Barcode barcode, int colorId,
 			String title, String message) {
 		super(context);
 		scanActivity = (ScanActivity) context;
@@ -41,9 +42,9 @@ public class ScanAlertDialog extends AlertDialog {
 				.findViewById(R.id.textView_result_message);
 
 		scanDialogView.setBackgroundColor(resources.getColor(colorId));
-		
+
 		scanResultBarcodeView.setText(String.format(context.getString(
-				R.string.tv_scan_dialog_barcode, barcode)));
+				R.string.tv_scan_dialog_barcode, barcode.getBarcode())));
 
 		scanResultTitleView.setText(title);
 
@@ -58,15 +59,5 @@ public class ScanAlertDialog extends AlertDialog {
 		});
 
 		setView(scanDialogView);
-
-//		setOnCancelListener(new OnCancelListener() {
-//
-//			@Override
-//			public void onCancel(DialogInterface dialog) {
-//				dialog.dismiss();
-//				scanActivity.startScanning();
-//
-//			}
-//		});
 	}
 }

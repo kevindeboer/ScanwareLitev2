@@ -1,5 +1,7 @@
 package com.paylogic.scanwarelite.activities;
 
+import javax.inject.Inject;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
@@ -26,23 +28,27 @@ public class CommonActivity extends Activity {
 
 	protected ProgressDialog progressDialog;
 	protected AlertDialog alertDialog;
-	protected DatabaseHelper databaseHelper;
-	protected ConnectivityHelper connHelper;
-	protected PreferenceHelper preferenceHelper;
+	@Inject
+	DatabaseHelper databaseHelper;
+	@Inject
+	ConnectivityHelper connHelper;
+	@Inject
+	PreferenceHelper preferenceHelper;
 	protected SQLiteDatabase db;
 
 	protected Resources resources;
 
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		app = (ScanwareLiteApplication) getApplicationContext();
+		app = (ScanwareLiteApplication) getApplication();
 		resources = getResources();
-		setDatabaseHelper(new DatabaseHelper(CommonActivity.this,
-				DatabaseHelper.DATABASE_NAME, null,
-				DatabaseHelper.DATABASE_VERSION));
-		setPreferenceHelper(new PreferenceHelper(CommonActivity.this));
-		setConnectivityHelper(new ConnectivityHelper(CommonActivity.this));
-
+		// setDatabaseHelper(new DatabaseHelper(CommonActivity.this,
+		// DatabaseHelper.DATABASE_NAME, null,
+		// DatabaseHelper.DATABASE_VERSION));
+		// setPreferenceHelper(new PreferenceHelper(CommonActivity.this));
+		// setConnectivityHelper(new ConnectivityHelper(CommonActivity.this));
+		ScanwareLiteApplication app = (ScanwareLiteApplication) getApplication();
+		app.getObjectGraph().inject(this);
 		Thread.setDefaultUncaughtExceptionHandler(new ExceptionHandler(
 				CommonActivity.this));
 	}
@@ -59,7 +65,7 @@ public class CommonActivity extends Activity {
 		super.onResume();
 		app.setRunning(true);
 		if (app.isEncrypted()) {
-//			Toast.makeText(this, "Decrypt", Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, "Decrypt", Toast.LENGTH_SHORT).show();
 			app.setEncrypted(false);
 		}
 	}
@@ -72,7 +78,7 @@ public class CommonActivity extends Activity {
 	protected void onStop() {
 		super.onStop();
 		if (!app.isRunning()) {
-//			Toast.makeText(this, "Encrypt", Toast.LENGTH_SHORT).show();
+			Toast.makeText(this, "Encrypt", Toast.LENGTH_SHORT).show();
 			app.setEncrypted(true);
 		}
 		if (progressDialog != null) {
@@ -120,7 +126,7 @@ public class CommonActivity extends Activity {
 	public void setDatabaseHelper(DatabaseHelper databaseHelper) {
 		this.databaseHelper = databaseHelper;
 	}
-	
+
 	public void logout() {
 		Intent intent = new Intent(CommonActivity.this, LoginActivity.class);
 		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);

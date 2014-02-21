@@ -4,6 +4,8 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
+import javax.inject.Inject;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -23,6 +25,7 @@ import android.widget.EditText;
 import com.paylogic.scanwarelite.APIFacade;
 import com.paylogic.scanwarelite.ApiResponse;
 import com.paylogic.scanwarelite.R;
+import com.paylogic.scanwarelite.ScanwareLiteApplication;
 import com.paylogic.scanwarelite.TaskListener;
 import com.paylogic.scanwarelite.dialogs.UnhandledExceptionDialog;
 import com.paylogic.scanwarelite.dialogs.login.EmptyInputDialog;
@@ -51,25 +54,28 @@ public class LoginActivity extends Activity {
 	private String username;
 	private String password;
 	private int userId;
-	
+
 	private String passwordHash;
 	private String usernameHash;
 
-	private PreferenceHelper preferenceHelper;
+	@Inject
+	PreferenceHelper preferenceHelper;
+	@Inject
+	ConnectivityHelper connHelper;
 
-	private ConnectivityHelper connHelper;
-
-	private Context context;
+	private Context mContext;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_login);
-		context = LoginActivity.this;
-		connHelper = new ConnectivityHelper(context);
+		mContext = LoginActivity.this;
 		offlineLoginTask = new OfflineLoginTask();
 		onlineLoginTask = new OnlineLoginTask();
-		preferenceHelper = new PreferenceHelper(LoginActivity.this);
+
+		ScanwareLiteApplication app = (ScanwareLiteApplication) getApplication();
+		app.getObjectGraph().inject(this);
+
 		preferenceHelper.setShowAllEvents(false);
 
 		loginButton = (Button) findViewById(R.id.button_login);
@@ -77,7 +83,7 @@ public class LoginActivity extends Activity {
 		passwordView = (EditText) findViewById(R.id.editText_password);
 
 		if (getIntent().getBooleanExtra("error", false)) {
-			alertDialog = new UnhandledExceptionDialog(context);
+			alertDialog = new UnhandledExceptionDialog(mContext);
 			alertDialog.show();
 		}
 
@@ -112,21 +118,21 @@ public class LoginActivity extends Activity {
 			boolean isConnected) {
 		// if both inputs are empty
 		if (username.length() == 0 && password.length() == 0) {
-			alertDialog = new EmptyInputDialog(context);
+			alertDialog = new EmptyInputDialog(mContext);
 			alertDialog.show();
 			return;
 		}
 
 		// if password is empty
 		if (password.length() == 0) {
-			alertDialog = new EmptyPasswordDialog(context);
+			alertDialog = new EmptyPasswordDialog(mContext);
 			alertDialog.show();
 			return;
 		}
 
 		// if username is empty
 		if (username.length() == 0) {
-			alertDialog = new EmptyUsernameDialog(context);
+			alertDialog = new EmptyUsernameDialog(mContext);
 			alertDialog.show();
 			return;
 		}
@@ -173,12 +179,12 @@ public class LoginActivity extends Activity {
 		private TaskListener listener;
 
 		public OfflineLoginTask() {
-			this.offlineLoginHelper = new OfflineLoginHelper(context);
+			this.offlineLoginHelper = new OfflineLoginHelper(mContext);
 		}
 
 		@Override
 		protected void onPreExecute() {
-			progressDialog = new LoginDialog(context);
+			progressDialog = new LoginDialog(mContext);
 			progressDialog.show();
 		}
 
@@ -213,7 +219,7 @@ public class LoginActivity extends Activity {
 		protected void onPostExecute(Void result) {
 			progressDialog.dismiss();
 			if (this.result == validLocalCredentials) {
-				Intent intent = new Intent(context, EventsActivity.class);
+				Intent intent = new Intent(mContext, EventsActivity.class);
 				intent.putExtra("username", username);
 				intent.putExtra("password", password);
 				intent.putExtra("userId", userId);
@@ -221,11 +227,11 @@ public class LoginActivity extends Activity {
 				startActivity(intent);
 
 			} else if (this.result == invalidLocalCredentials) {
-				alertDialog = new InvalidCredentialsDialog(context);
+				alertDialog = new InvalidCredentialsDialog(mContext);
 				alertDialog.show();
 
 			} else if (this.result == noLocalData) {
-				alertDialog = new NoLocalDataDialog(context);
+				alertDialog = new NoLocalDataDialog(mContext);
 				alertDialog.show();
 			}
 			if (listener != null) {
@@ -255,12 +261,12 @@ public class LoginActivity extends Activity {
 
 		public OnlineLoginTask() {
 			this.apiFacade = new APIFacade();
-			this.olHelper = new OfflineLoginHelper(context);
+			this.olHelper = new OfflineLoginHelper(mContext);
 		}
 
 		@Override
 		protected void onPreExecute() {
-			progressDialog = new LoginDialog(context);
+			progressDialog = new LoginDialog(mContext);
 			progressDialog.show();
 		}
 
@@ -291,8 +297,7 @@ public class LoginActivity extends Activity {
 				Node userIdNode = root.getElementsByTagName("userid").item(0);
 				if (userIdNode.getNodeType() == Node.ELEMENT_NODE) {
 					Element userIdElement = (Element) userIdNode;
-					userId = Integer.parseInt(userIdElement
-							.getAttribute("id"));
+					userId = Integer.parseInt(userIdElement.getAttribute("id"));
 
 					String salt = BCrypt.gensalt();
 
@@ -310,13 +315,13 @@ public class LoginActivity extends Activity {
 			progressDialog.dismiss();
 
 			if (response == ApiResponse.OK) {
-				Intent intent = new Intent(context, EventsActivity.class);
+				Intent intent = new Intent(mContext, EventsActivity.class);
 				intent.putExtra("username", username);
 				intent.putExtra("password", password);
 				intent.putExtra("userId", userId);
-				
-				String writeString = userId + " " + usernameHash
-						+ " " + passwordHash;
+
+				String writeString = userId + " " + usernameHash + " "
+						+ passwordHash;
 				FileOutputStream userFileStream;
 
 				try {
@@ -328,10 +333,9 @@ public class LoginActivity extends Activity {
 					e.printStackTrace();
 				}
 
-
 				startActivity(intent);
 			} else if (response == ApiResponse.INVALID_LOGIN) {
-				alertDialog = new InvalidCredentialsDialog(context);
+				alertDialog = new InvalidCredentialsDialog(mContext);
 				alertDialog.show();
 			}
 

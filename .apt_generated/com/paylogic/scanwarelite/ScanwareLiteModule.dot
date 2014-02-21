@@ -1,0 +1,8 @@
+digraph G1 {
+  concentrate = true;
+  CommonActivity -> ConnectivityHelper;
+  CommonActivity -> DatabaseHelper;
+  CommonActivity -> PreferenceHelper;
+  LoginActivity -> ConnectivityHelper;
+  LoginActivity -> PreferenceHelper;
+}

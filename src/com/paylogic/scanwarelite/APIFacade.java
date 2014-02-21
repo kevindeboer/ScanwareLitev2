@@ -65,7 +65,7 @@ public class APIFacade {
 		urlParams = "&username=" + username + "&password="
 				+ password;
 		urlString = urlBase + command + urlParams;
-		System.out.println();
+
 		Document response  = callAPI(urlString);
 		return response;
 	}

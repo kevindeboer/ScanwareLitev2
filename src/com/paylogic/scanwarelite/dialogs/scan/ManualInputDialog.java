@@ -30,20 +30,22 @@ public class ManualInputDialog extends CommonAlertDialog {
 		input.setSingleLine(true);
 		setView(input);
 
-		
-		setButton(BUTTON_POSITIVE, context.getString(R.string.dialog_btn_ok), new OnClickListener() {
-			public void onClick(DialogInterface dialog, int id) {
-				String barcode = input.getText().toString();
+		setButton(BUTTON_POSITIVE, context.getString(R.string.dialog_btn_ok),
+				new OnClickListener() {
+					public void onClick(DialogInterface dialog, int id) {
+						String barcodeString = input.getText().toString();
 
-				scanActivity.processBarcode(barcode);
-			}
-		});
-		
-		setButton(BUTTON_NEGATIVE, context.getString(R.string.dialog_btn_cancel), new OnClickListener() {
-			public void onClick(DialogInterface dialog, int id) {
-				scanActivity.startScanning();
-			}
-		});
+						scanActivity.processBarcode(barcodeString);
+					}
+				});
+
+		setButton(BUTTON_NEGATIVE,
+				context.getString(R.string.dialog_btn_cancel),
+				new OnClickListener() {
+					public void onClick(DialogInterface dialog, int id) {
+						scanActivity.startScanning();
+					}
+				});
 
 		setOnKeyListener(new OnKeyListener() {
 			@Override

@@ -3,9 +3,10 @@ package com.paylogic.scanwarelite.dialogs.scan;
 import android.content.Context;
 
 import com.paylogic.scanwarelite.R;
+import com.paylogic.scanwarelite.models.Barcode;
 
 public class BarcodeNotFoundDialog extends ScanAlertDialog {
-	public BarcodeNotFoundDialog(final Context context, String barcode) {
+	public BarcodeNotFoundDialog(Context context, Barcode barcode) {
 		super(context, barcode, R.color.scanInvalid, getTitle(context),
 				getMessage(context));
 	}

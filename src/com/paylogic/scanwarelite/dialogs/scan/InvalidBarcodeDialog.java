@@ -3,10 +3,11 @@ package com.paylogic.scanwarelite.dialogs.scan;
 import android.content.Context;
 
 import com.paylogic.scanwarelite.R;
+import com.paylogic.scanwarelite.models.Barcode;
 
 public class InvalidBarcodeDialog extends ScanAlertDialog {
 
-	public InvalidBarcodeDialog(final Context context, String barcode) {
+	public InvalidBarcodeDialog(Context context, Barcode barcode) {
 		super(context, barcode, R.color.scanInvalid, getTitle(context),
 				getMessage(context));
 	}

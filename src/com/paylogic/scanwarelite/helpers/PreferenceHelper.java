@@ -1,5 +1,7 @@
 package com.paylogic.scanwarelite.helpers;
 
+import javax.inject.Inject;
+
 import android.content.Context;
 import android.content.SharedPreferences;
 
@@ -12,6 +14,7 @@ public class PreferenceHelper {
 	
 	private final String keyShowAllEvents = "showAll";
 	
+	@Inject
 	public PreferenceHelper(Context context){
 		settings = context.getSharedPreferences(prefsFile,
 				Context.MODE_PRIVATE);

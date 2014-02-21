@@ -87,10 +87,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 			mOutput.flush();
 			mOutput.close();
 			source.close();
-			System.out.println();
-//			SQLiteDatabase.openDatabase(dbPath.getPath(), null, SQLiteDatabase.OPEN_READWRITE).close();
+
 			getWritableDatabase().close();
-			System.out.println();	
+
 		}
 	}
 }

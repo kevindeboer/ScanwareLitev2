@@ -260,8 +260,6 @@ public class ProductsActivity extends CommonActivity {
 			eventName = cursor.getString(cursor
 					.getColumnIndex(DatabaseHelper.EVENT_KEY_TITLE));
 
-
-
 			return null;
 		}
 

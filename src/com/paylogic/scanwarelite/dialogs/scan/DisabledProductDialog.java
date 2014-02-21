@@ -3,14 +3,13 @@ package com.paylogic.scanwarelite.dialogs.scan;
 import android.content.Context;
 
 import com.paylogic.scanwarelite.R;
+import com.paylogic.scanwarelite.models.Barcode;
 
 public class DisabledProductDialog extends ScanAlertDialog {
 
-	public DisabledProductDialog(final Context context, String barcode,
-			String product) {
+	public DisabledProductDialog(Context context, Barcode barcode) {
 		super(context, barcode, R.color.scanDisabled, getTitle(context),
-				getMessage(context, product));
-
+				getMessage(context, barcode.getProductName()));
 	}
 
 	private static String getTitle(Context context) {

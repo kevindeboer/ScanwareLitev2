@@ -7,7 +7,7 @@ import com.paylogic.scanwarelite.R;
 
 public class InvalidBarcodeLengthDialog extends AlertDialog {
 
-	public InvalidBarcodeLengthDialog(final Context context) {
+	public InvalidBarcodeLengthDialog(Context context) {
 		super(context);
 		setTitle(context
 				.getString(R.string.dialog_title_invalid_barcode_length));

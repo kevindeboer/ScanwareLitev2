@@ -1,0 +1,6 @@
+<factorypath>
+    <factorypathentry kind="WKSPJAR" id="/ScanwareLite/libs/dagger-1.2.1.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="WKSPJAR" id="/ScanwareLite/libs/dagger-compiler-1.2.1.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="WKSPJAR" id="/ScanwareLite/libs/javawriter-2.2.1.jar" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="WKSPJAR" id="/ScanwareLite/libs/javax.inject-1.jar" enabled="true" runInBatchMode="false"/>
+</factorypath>

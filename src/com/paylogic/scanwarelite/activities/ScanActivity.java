@@ -33,6 +33,9 @@ import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.paylogic.scanwarelite.BarcodeProcessor;
+import com.paylogic.scanwarelite.BarcodeProcessor.InvalidBarcodeLengthException;
+import com.paylogic.scanwarelite.BarcodeProcessor.InvalidChecksumException;
 import com.paylogic.scanwarelite.R;
 import com.paylogic.scanwarelite.dialogs.scan.AlreadySeenDialog;
 import com.paylogic.scanwarelite.dialogs.scan.BarcodeNotFoundDialog;
@@ -44,12 +47,15 @@ import com.paylogic.scanwarelite.dialogs.scan.ManualInputDialog;
 import com.paylogic.scanwarelite.dialogs.scan.PaymentErrorDialog;
 import com.paylogic.scanwarelite.dialogs.scan.ValidProductDialog;
 import com.paylogic.scanwarelite.helpers.DatabaseHelper;
+import com.paylogic.scanwarelite.models.Barcode;
 import com.paylogic.scanwarelite.views.CameraPreview;
 
 public class ScanActivity extends CommonActivity {
 	static {
 		System.loadLibrary("iconv");
 	}
+
+	private BarcodeProcessor barcodeProcessor;
 
 	private TextView startScanningView;
 	private CameraPreview mPreview;
@@ -59,7 +65,7 @@ public class ScanActivity extends CommonActivity {
 	private MediaPlayer mediaPlayer;
 	private boolean hasFlashlight;
 	private boolean flashlightEnabled;
-	private String barcode;
+	private Barcode barcode;
 	private boolean scanning = false;
 	private Handler autoFocusHandler;
 	private Runnable doAutoFocus = new Runnable() {
@@ -89,24 +95,27 @@ public class ScanActivity extends CommonActivity {
 				if (result != 0) {
 					stopScanning();
 
+					String barcodeString = null;
+
 					SymbolSet syms = scanner.getResults();
 					for (Symbol sym : syms) {
-						barcode = sym.getData();
+						barcodeString = sym.getData();
 						// Im only interested in the first result, but there is
 						// no way to index SymbolSet
 						break;
 					}
-					processBarcode(barcode);
 
+					processBarcode(barcodeString);
 				}
 			}
 		}
+
 	};
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
+		barcodeProcessor = new BarcodeProcessor(databaseHelper);
 		hasFlashlight = getPackageManager().hasSystemFeature(
 				PackageManager.FEATURE_CAMERA_FLASH);
 
@@ -232,205 +241,92 @@ public class ScanActivity extends CommonActivity {
 
 	public void startScanning() {
 		scanning = true;
-		// mCamera.setPreviewCallback(previewCb);
 		invalidateOptionsMenu();
 	}
 
 	public void stopScanning() {
 		scanning = false;
-		// mCamera.setPreviewCallback(null);
-		// mPreview.getHolder().removeCallback(mPreview);
 		invalidateOptionsMenu();
 	}
 
-	public void processBarcode(String barcode) {
-		if (barcode.length() == 13) {
-			if (!validChecksum(barcode)) {
-				alertDialog = new InvalidBarcodeDialog(ScanActivity.this,
-						barcode);
-				alertDialog.show();
-
-				mediaPlayer = MediaPlayer.create(ScanActivity.this,
-						R.raw.invalid);
-				mediaPlayer.start();
+	public void processBarcode(String barcodeString) {
+		try {
+			barcode = barcodeProcessor.process(barcodeString);
+			if (!barcode.isFound()) {
+				showBarcodeNotFoundDialog();
 				return;
-
-			} else {
-				barcode = barcode.substring(0, barcode.length() - 1);
 			}
-		}
-
-		if (barcode.length() == 12) {
-			String query = "";
-			Cursor cursor;
-
-			DatabaseHelper databaseHelper = new DatabaseHelper(
-					ScanActivity.this, DatabaseHelper.DATABASE_NAME,
-					null, DatabaseHelper.DATABASE_VERSION);
-
-			SQLiteDatabase db = databaseHelper.getWritableDatabase();
-
-			query = "SELECT " + DatabaseHelper.BARCODES_KEY_CODE + ", "
-					+ DatabaseHelper.BARCODES_KEY_NAME + ", "
-					+ DatabaseHelper.BARCODES_KEY_PAYSTATUS + ", "
-					+ DatabaseHelper.BARCODES_KEY_SEEN + ", "
-					+ DatabaseHelper.BARCODES_KEY_SEENDATE + ", "
-					+ DatabaseHelper.PRODUCTS_KEY_ALLOWED + ", "
-					+ DatabaseHelper.PRODUCTS_KEY_TITLE + " FROM "
-					+ DatabaseHelper.BARCODES_TABLE + ", "
-					+ DatabaseHelper.PRODUCTS_TABLE
-					+ " WHERE barcodes.productID = products.id and code = ?";
-			cursor = db.rawQuery(query, new String[] { barcode });
-
-			if (cursor.getCount() == 0) {
-				// barcode not found error
-				alertDialog = new BarcodeNotFoundDialog(ScanActivity.this,
-						barcode);
-				alertDialog.show();
-
-				mediaPlayer = MediaPlayer.create(ScanActivity.this,
-						R.raw.invalid);
-				mediaPlayer.start();
+			if (!barcode.isPaymentValid()) {
+				showPaymentErrorDialog();
 				return;
-
-			} else {
-				cursor.moveToFirst();
-				int payStatus = cursor
-						.getInt(cursor
-								.getColumnIndex(DatabaseHelper.BARCODES_KEY_PAYSTATUS));
-
-				// TODO: Make this more specific
-				if (payStatus != 101 && payStatus != 102) {
-					alertDialog = new PaymentErrorDialog(ScanActivity.this,
-							barcode);
-					alertDialog.show();
-
-					mediaPlayer = MediaPlayer.create(ScanActivity.this,
-							R.raw.invalid);
-					mediaPlayer.start();
-					return;
-				}
-
-				boolean seen = cursor
-						.getInt(cursor
-								.getColumnIndex(DatabaseHelper.BARCODES_KEY_SEEN)) > 0;
-				if (seen) {
-					// already seen error
-					String seenDate = cursor
-							.getString(cursor
-									.getColumnIndex(DatabaseHelper.BARCODES_KEY_SEENDATE));
-
-					alertDialog = new AlreadySeenDialog(ScanActivity.this,
-							barcode, seenDate);
-					alertDialog.show();
-
-					mediaPlayer = MediaPlayer.create(ScanActivity.this,
-							R.raw.invalid);
-					mediaPlayer.start();
-					return;
-				}
-
-				boolean allowed = cursor
-						.getInt(cursor
-								.getColumnIndex(DatabaseHelper.PRODUCTS_KEY_ALLOWED)) > 0;
-				String product = cursor
-						.getString(cursor
-								.getColumnIndex(DatabaseHelper.PRODUCTS_KEY_TITLE));
-
-				if (!allowed) {
-					// filtered product error
-
-					alertDialog = new DisabledProductDialog(ScanActivity.this,
-							barcode, product);
-					alertDialog.show();
-
-					mediaPlayer = MediaPlayer.create(ScanActivity.this,
-							R.raw.invalid);
-					mediaPlayer.start();
-					return;
-				} else {
-					// Ticket OK!
-					String name = cursor
-							.getString(cursor
-									.getColumnIndex(DatabaseHelper.BARCODES_KEY_NAME));
-
-					alertDialog = new ValidProductDialog(ScanActivity.this,
-							barcode, product, name);
-					alertDialog.show();
-
-					mediaPlayer = MediaPlayer.create(ScanActivity.this,
-							R.raw.valid);
-					mediaPlayer.start();
-
-					Date now = new Date();
-
-					DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-					String timeStamp = df.format(now);
-
-					ContentValues values = new ContentValues();
-					values.put(DatabaseHelper.BARCODES_KEY_SEEN, true);
-					values.put(DatabaseHelper.BARCODES_KEY_SEENDATE,
-							timeStamp);
-
-					String whereClause = DatabaseHelper.BARCODES_KEY_CODE
-							+ "= ?";
-					String[] whereArgs = { barcode };
-
-					db.update(DatabaseHelper.BARCODES_TABLE, values,
-							whereClause, whereArgs);
-
-					return;
-				}
 			}
 
-		} else {
+			if (barcode.isSeen()) {
+				showAlreadySeenDialog();
+				return;
+			}
+
+			if (!barcode.isAllowed()) {
+				showDisabledProductDialog();
+				return;
+			}
+
+			showValidBarcodeDialog();
+			barcodeProcessor.markBarcodeAsSeen(barcode);
+
+		} catch (InvalidChecksumException e) {
+			alertDialog = new InvalidBarcodeDialog(ScanActivity.this, barcode);
+			alertDialog.show();
+
+			mediaPlayer = MediaPlayer.create(ScanActivity.this, R.raw.invalid);
+			mediaPlayer.start();
+		} catch (InvalidBarcodeLengthException e) {
 			alertDialog = new InvalidBarcodeLengthDialog(ScanActivity.this);
 			alertDialog.show();
+			
+			mediaPlayer = MediaPlayer.create(ScanActivity.this, R.raw.invalid);
+			mediaPlayer.start();
 		}
 	}
 
-	private boolean validChecksum(String barcode) {
-		// If barcode is not 13 characters/digits long
-		if (barcode.length() != 13) {
-			return false;
-		}
-		// Sort the numbers by even and odd indexes, without the checksum digit
-		ArrayList<Integer> oddIndexNumbers = new ArrayList<Integer>();
-		ArrayList<Integer> evenIndexNumbers = new ArrayList<Integer>();
-		for (int i = 0; i < 12; i++) {
-			if (i % 2 == 0) {
-				evenIndexNumbers.add(Character.getNumericValue(barcode
-						.charAt(i)));
-			} else {
-				oddIndexNumbers
-						.add(Character.getNumericValue(barcode.charAt(i)));
-			}
-		}
-		// Add all odd numbers, multiply by 3
-		int addedOdds = 0;
-		for (int i = 0; i < evenIndexNumbers.size(); i++) {
-			addedOdds += oddIndexNumbers.get(i);
-		}
-		int multipliedAddedOdds = addedOdds * 3;
-		// Add all even numbers
-		int addedEvens = 0;
-		for (int i = 0; i < evenIndexNumbers.size(); i++) {
-			addedEvens += evenIndexNumbers.get(i);
-		}
+	private void showBarcodeNotFoundDialog() {
+		alertDialog = new BarcodeNotFoundDialog(ScanActivity.this, barcode);
+		alertDialog.show();
 
-		// Add the results of previous 2 steps
-		int total = addedEvens + multipliedAddedOdds;
-		// Subtracts the above result from the next multiple of 10
-		int nextTen = (int) (Math.ceil((double) total / 10) * 10);
+		mediaPlayer = MediaPlayer.create(ScanActivity.this, R.raw.invalid);
+		mediaPlayer.start();
+	}
 
-		int checksum = nextTen - total;
+	private void showValidBarcodeDialog() {
+		alertDialog = new ValidProductDialog(ScanActivity.this, barcode);
+		alertDialog.show();
 
-		// Assert if checksum is correct
-		if (Character.getNumericValue(barcode.charAt(12)) == checksum) {
-			return true;
-		} else {
-			return false;
-		}
+		mediaPlayer = MediaPlayer.create(ScanActivity.this, R.raw.valid);
+		mediaPlayer.start();
+	}
+
+	private void showDisabledProductDialog() {
+		alertDialog = new DisabledProductDialog(ScanActivity.this, barcode);
+		alertDialog.show();
+
+		mediaPlayer = MediaPlayer.create(ScanActivity.this, R.raw.invalid);
+		mediaPlayer.start();
+	}
+
+	private void showAlreadySeenDialog() {
+		alertDialog = new AlreadySeenDialog(ScanActivity.this, barcode);
+		alertDialog.show();
+
+		mediaPlayer = MediaPlayer.create(ScanActivity.this, R.raw.invalid);
+		mediaPlayer.start();
+	}
+
+	private void showPaymentErrorDialog() {
+		alertDialog = new PaymentErrorDialog(ScanActivity.this, barcode);
+		alertDialog.show();
+
+		mediaPlayer = MediaPlayer.create(ScanActivity.this, R.raw.invalid);
+		mediaPlayer.start();
 	}
 
 	private class InitCameraTask extends AsyncTask<Void, Void, Void> {
