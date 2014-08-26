@@ -24,3 +24,6 @@ License
 This software is licensed under the `MIT license <http://en.wikipedia.org/wiki/MIT_License>`_
 
 See `License <https://github.com/kevindeboer/Scanwarelitev2/blob/master/LICENSE.txt>`_
+
+
+© 2014 Paylogic International.
