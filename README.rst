@@ -1,8 +1,21 @@
 
+Scanware Lite
+===================================
+
+An android application that Paylogic can use to scan their tickets. It requires a Paylogic scanware user account to use.
+
+
+Author
+-------
+
+The author of this project is Kevin de Boer: kevindeboer16@gmail.com
+
+
 Contact
 -------
 
-If you have questions, bug reports, suggestions, etc. please contact the author at: kevindeboer16@gmail.com
+If you have questions, bug reports, suggestions, etc. please create an issue on
+the `GitHub project page <http://github.com/paylogic/ScanwareLitev2>`_.
 
 
 License
